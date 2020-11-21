@@ -106,3 +106,53 @@ Class Scope :
    def resolve(symbol): ← lookup a name in scope
 ```
 
+## Runtime Analysis (PLUTO interpreter)
+
+### Implementing registers and memory spaces
+
+PLUTO is not a general purpose language, that’s why we have to specifically implement some of its characteristics in a different way. There is always global memory space which corresponds to global-procedure scope, but PLUTO allows us to implement steps in a nested manner. That’s why memory space can be implemented according to static scope structure, as property of procedure and step instances. To keep it simple for our example we can implement different memory spaces as dictionaries inside a step or procedure instance:
+
+```python
+class ProcedureSymbol(Symbol):
+    execution_status = "executing"
+    memory_space = { variable : variableSymbolInstance }
+    def resolve_from_memory(variable):
+class VariableSymbol(Symbol):
+    name = ....
+    parent = ProcedureSymbolInstance
+    value = ....
+    def update_in_memory(self):
+        parent.memory_space[variableSymbolInstance.name] = variableSymbolInstance
+```
+
+### Implementing run() method
+
+In order to run a PLUTO procedure, this composite-like pattern implementation allows us to implement different run methods for each symbol class. That way its composite object will be able to call the run() method of its components either structured or in parallel (according to PLUTO restrictions) and if needed sends requests or receives data through the space system model proxy. 
+
+Evaluating an expression inside a run() method:
+
+```python
+class IfStatement:
+    self.expression = ExpressionSymbolInstance
+self.if_block = IfBlockInstance
+self.else_block = ThenBlockInstance    
+def run():
+    result = self.expression.run()
+    if result:
+            self.if_block(run)
+        else if self.else_block != None:
+            self_block.run()
+
+class ExpressionSymbol:
+    def run():
+        d = resolve_variables_from_memory()
+            locals().update(d)
+            result = eval(self.data)
+            return result
+```
+
+### Implementing watchdogs through multiple observers and composite
+
+According to PLUTO when an event is raised it may need to be handled by its scope’s (procedure or step) watchdog body. Same way, when watchdog finishes handling, has to return to a specific point of procedure’s or step’s execution.
+
+First of all we have to implement a raise_event() method for each event instance this method has to notify its parent instance (step or procedure) then, procedure or step has to notify watchdog thread and pause execution. When watchdog finishes handling the event, has to notify procedure with the results, and the execution of the procedure proceeds according to this final notification.
