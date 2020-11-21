@@ -1,0 +1,20 @@
+procedure
+    declare
+      event chaos described by Total disaster , event chaos2
+    end declare
+    main
+      initiate Switch on Star Tracker2
+      in parallel until all complete
+        initiate and confirm step SWITCH ON SECOND STAR TRACKER
+          main
+            initiate and confirm Switch on Reaction Wheel3 of AOC of Satellite;
+          end main
+        end step;
+        initiate and confirm step SWITCH ON FIRST STAR TRACKER
+          main
+            initiate and confirm Switch on Star Tracker1;
+          end main
+        end step;
+      end parallel
+    end main
+end procedure

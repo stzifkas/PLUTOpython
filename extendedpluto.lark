@@ -1,0 +1,33 @@
+_NL: /(\r?\n)/
+%import common.WS
+%ignore WS
+WORD: /\b(?!described by\b)\b(?!if\b)\b(?!then\b)\b(?!wait for event\b)\b(?!wait until\b)[a-zA-Z0-9+=-\\<>!:]*\w/
+
+procedurebody: "procedure" _NL  (proceduremainbody | proceduredeclarationbody | procedurepreconditionsbody)+ _NL "end procedure"
+proceduremainbody: "main"_NL (procedurestatement _NL)+  "end main"
+proceduredeclarationbody: "declare" _NL (eventdeclaration | "," eventdeclaration)+ _NL "end declare"
+procedurepreconditionsbody: "preconditions" _NL (ifthen | wait)+ _NL"end preconditions"
+eventdeclaration: ("event" eventname "described by" description | "event" eventname )
+description: WORD+
+eventname: WORD+
+ifthen: "if" ifexpression "then" thenexpression
+wait: (waituntil | waitfor) expression
+waitfor: "wait for" (expression | "event" eventname)
+waituntil: "wait until" expression
+expression: WORD+
+ifexpression: WORD+
+thenexpression: WORD+ | ifthen | waitfor | waituntil
+procedurestatement: paralleluntilall | paralleluntilone | setprocedurecontext | initiateandconfirmstep | initiateandconfirmactivity | initiateactivity
+
+setprocedurecontext: "in the context of" WORD+ "do" procedurestatement "end context"
+paralleluntilall: "in parallel until all complete"  _NL ((initiateandconfirmstep | initiateandconfirmactivity) ";" _NL)+ "end parallel"
+paralleluntilone: "in parallel until one completes"  _NL ((initiateandconfirmstep | initiateandconfirmactivity) ";" _NL)+ "end parallel"
+initiateandconfirmstep: "initiate and confirm step" stepname _NL stepdefinition _NL "end step"
+stepname: WORD+
+stepdefinition: stepmainbody
+stepmainbody: "main"  stepstatement  "end main"
+stepstatement: initiateandconfirmactivity ";"
+initiateandconfirmactivity: "initiate and confirm" activitycall
+activitycall: switchon
+switchon: "Switch on" WORD+
+initiateactivity: "initiate" activitycall
