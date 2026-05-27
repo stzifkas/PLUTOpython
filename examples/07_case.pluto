@@ -1,0 +1,17 @@
+// case statement.
+procedure
+    main
+      mode := 2
+      case mode of
+        when 1 do
+          inform user "STANDBY"
+        when 2 do
+          inform user "NOMINAL"
+          initiate and confirm Switch on Star Tracker1
+        when 3 do
+          inform user "SAFE"
+        otherwise
+          inform user "UNKNOWN"
+      end case
+    end main
+end procedure

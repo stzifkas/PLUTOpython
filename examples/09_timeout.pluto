@@ -1,0 +1,17 @@
+// `wait ... with timeout` — bounded wait. Combined with a watchdog that
+// raises the event mid-flight, so the wait completes before the timeout fires.
+procedure
+    declare
+      event ready described by Star tracker hot and tracking
+    end declare
+    main
+      raise event ready
+      wait for event ready with timeout 2
+      inform user "ready arrived in time"
+      counter := 0
+      while counter < 3 do
+        counter := counter + 1
+      end while
+      inform user "counter reached 3"
+    end main
+end procedure

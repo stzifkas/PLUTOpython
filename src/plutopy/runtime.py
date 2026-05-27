@@ -219,15 +219,23 @@ class Procedure:
     confirmation_status: str = "not available"
     events: Dict[str, Event] = field(default_factory=dict)
     variables: Dict[str, Any] = field(default_factory=dict)
+    watchdog_handlers: Dict[str, Callable[[], None]] = field(default_factory=dict)
 
     def declare_event(self, event: Event) -> Event:
         self.events[event.name] = event
         return event
 
+    def register_watchdog(self, event_name: str, handler: Callable[[], None]) -> None:
+        self.watchdog_handlers[event_name] = handler
+
     def raise_event(self, name: str) -> None:
         if name not in self.events:
             raise PlutoRuntimeError(f"event not declared: {name!r}")
         self.events[name].raise_()
+        handler = self.watchdog_handlers.get(name)
+        if handler is not None:
+            log.info("watchdog: handling %s", name)
+            handler()
 
     def start(self) -> None:
         self.execution_status = "executing"

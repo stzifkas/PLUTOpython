@@ -204,7 +204,8 @@ That generated file is self-contained Python. Drop it into any project that depe
 | Sections | `procedure / declare / preconditions / main / watchdog / confirmation / end procedure` |
 | Events | `event NAME described by DESCRIPTION`, `raise event NAME`, `wait for event NAME` |
 | Activities | `initiate <call>`, `initiate and confirm <call>`, `initiate and confirm step NAME main … end main end step`, `Switch on/off TARGET (of TARGET)*` |
-| Control flow | `if … then … end if`, `while … do … end while`, `for X := A to B [by C] do … end for`, `repeat … until E end repeat`, `wait until E` |
+| Control flow | `if … then … else … end if`, `case E of when V do … otherwise … end case`, `while … do … [with timeout E] end while`, `for X := A to B [by C] do … end for`, `repeat … until E [with timeout E] end repeat`, `wait for event E [with timeout T]`, `wait until E [with timeout T]` |
+| Watchdog | `watchdog on EVENT do … end on end watchdog` — handlers fire synchronously when the event is raised |
 | Concurrency | `in parallel until all complete … end parallel`, `in parallel until one completes … end parallel` |
 | Assignment | `var := expr` |
 | Expressions | numbers, strings, qualified names, `+ - * /`, `> < >= <= = <>`, `and / or / not` |
@@ -294,10 +295,7 @@ PLUTOpython/
 
 To stay shippable for the Finish-Up-A-Thon deadline:
 
-- **`case` statement** — parseable in principle, not in the grammar yet.
-- **`if/else` arms** — the grammar parses `if … then STATEMENTS end if`; the `else` branch isn't currently distinguished from then-statements because the rule lacks an explicit `else` marker. Easy follow-up.
-- **Continuation tests / `with timeout E`** — recognised in spec, not parsed.
-- **Watchdog dispatch** — `watchdog` sections parse and are noted as comments in the transpiled output but don't yet hook into event raising at runtime.
+- **Continuation tests** on `initiate and confirm` — recognised in spec, not parsed.
 - **`set the X of Y to Z`** generic object operations — only `Switch on/off` is supported as an activity call. Adding more verbs is a one-line grammar change per verb plus a runtime helper.
 - **Full ECSS Space System Model** — the 2019 prototype carried a sprawling SSM class hierarchy; the current runtime trims it to `SystemElement`, `Activity`, `Event`. The full model can be re-introduced incrementally on top of the runtime registry.
 

@@ -1,0 +1,18 @@
+// Watchdog: an event handler runs synchronously when the event is raised.
+procedure
+    declare
+      event boom described by Critical failure
+    end declare
+    watchdog
+      on boom do
+        inform user "watchdog handling boom"
+        initiate and confirm Switch off Reaction Wheel3
+      end on
+    end watchdog
+    main
+      initiate and confirm Switch on Reaction Wheel3
+      log "about to raise boom"
+      raise event boom
+      log "after boom"
+    end main
+end procedure

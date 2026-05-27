@@ -1,0 +1,13 @@
+// if/else, comparison expressions.
+procedure
+    main
+      mode := 2
+      if mode = 1 then
+        inform user "nominal mode"
+        initiate and confirm Switch on Star Tracker1
+      else
+        inform user "safe mode"
+        initiate and confirm Switch off Reaction Wheel3
+      end if
+    end main
+end procedure

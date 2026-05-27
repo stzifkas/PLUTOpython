@@ -47,6 +47,7 @@ confirmation_section: "confirmation" statement+ "end" "confirmation"
           | parallel_one_stmt
           | context_stmt
           | if_stmt
+          | case_stmt
           | while_stmt
           | for_stmt
           | repeat_stmt
@@ -65,14 +66,23 @@ parallel_one_stmt: "in" "parallel" "until" "one" "completes" statement+ "end" "p
 
 context_stmt: "in" "the" "context" "of" qname "do" statement+ "end" "context"
 
-if_stmt: "if" expression "then" statement+ ("else" statement+)? "end" "if"
-while_stmt: "while" expression "do" statement+ "end" "while"
+if_stmt: "if" expression "then" if_then ("else" if_else)? "end" "if"
+if_then: statement+
+if_else: statement+
+
+case_stmt: "case" expression "of" case_arm+ ("otherwise" case_otherwise)? "end" "case"
+case_arm: "when" expression "do" statement+
+case_otherwise: statement+
+
+while_stmt: "while" expression "do" statement+ timeout_clause? "end" "while"
 for_stmt: "for" name ":=" expression "to" expression ("by" expression)? "do" statement+ "end" "for"
-repeat_stmt: "repeat" statement+ "until" expression "end" "repeat"
+repeat_stmt: "repeat" statement+ "until" expression timeout_clause? "end" "repeat"
 
 ?wait_stmt: wait_for_event | wait_until_expr
-wait_for_event: "wait" "for" "event" name
-wait_until_expr: "wait" "until" expression
+wait_for_event: "wait" "for" "event" name timeout_clause?
+wait_until_expr: "wait" "until" expression timeout_clause?
+
+timeout_clause: "with" "timeout" expression
 
 assign_stmt: name ":=" expression
 log_stmt: "log" expression

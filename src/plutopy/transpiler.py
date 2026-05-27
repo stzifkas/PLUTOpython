@@ -99,6 +99,21 @@ class _Emitter:
             for decl in declare.children:
                 lines.append(INDENT + self._emit_event_decl(decl))
 
+        if watchdog is not None:
+            lines.append(f"{INDENT}# --- watchdog handlers ---")
+            for handler in watchdog.children:
+                ev_name = _text_of_name(handler.children[0])
+                self._step_counter += 1
+                fn_name = f"_watchdog_{self._step_counter}"
+                lines.append(f"{INDENT}def {fn_name}():")
+                body = handler.children[1:]
+                if not body:
+                    lines.append(f"{INDENT}{INDENT}pass")
+                else:
+                    for s in body:
+                        lines.extend(_indent_block(self._emit_statement(s), 2))
+                lines.append(f'{INDENT}proc.register_watchdog("{ev_name}", {fn_name})')
+
         if preconds is not None:
             lines.append(f"{INDENT}# --- preconditions ---")
             for pre in preconds.children:
@@ -113,13 +128,6 @@ class _Emitter:
             lines.append(f"{INDENT}# --- confirmation ---")
             for stmt in confirmation.children:
                 lines.extend(_indent_block(self._emit_statement(stmt), 1))
-
-        if watchdog is not None:
-            lines.append(f"{INDENT}# --- watchdog handlers (registered, fire on raise_event) ---")
-            # for simplicity, emitted as comments; full handler dispatch is out of scope
-            for handler in watchdog.children:
-                ev_name = _text_of_name(handler.children[0])
-                lines.append(f"{INDENT}# on event {ev_name}: handler defined in source")
 
         lines.append(f"{INDENT}proc.finish()")
         return "\n".join(lines) + "\n"
@@ -191,25 +199,54 @@ class _Emitter:
 
     def _stmt_if_stmt(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
-        # Children: expression, then-stmts..., (else-stmts...)? — but we can't tell where else starts
-        # without an explicit marker. Lark currently includes both as flat children.
-        # To distinguish, look for 'else_marker' or rely on rule structure. Our grammar
-        # has no explicit marker, so we treat all remaining as 'then' (no else). To support
-        # else, we'd need to refactor the grammar. For now, emit then-only.
-        # TODO: explicit else marker in grammar
+        then_node = node.children[1]  # if_then
+        else_node = node.children[2] if len(node.children) > 2 else None  # if_else
         lines = [f"if {expr}:"]
-        body = node.children[1:]
-        if not body:
-            lines.append(f"{INDENT}pass")
-        else:
-            for s in body:
+        for s in then_node.children:
+            lines.extend(_indent_block(self._emit_statement(s), 1))
+        if else_node is not None:
+            lines.append("else:")
+            for s in else_node.children:
+                lines.extend(_indent_block(self._emit_statement(s), 1))
+        return lines
+
+    def _stmt_case_stmt(self, node: Tree) -> List[str]:
+        expr = self._emit_expression(node.children[0])
+        var = "_case_expr"
+        lines = [f"{var} = {expr}"]
+        first = True
+        otherwise_node = None
+        for child in node.children[1:]:
+            if child.data == "case_otherwise":
+                otherwise_node = child
+                continue
+            arm_expr = self._emit_expression(child.children[0])
+            stmts = child.children[1:]
+            keyword = "if" if first else "elif"
+            first = False
+            lines.append(f"{keyword} {var} == {arm_expr}:")
+            if not stmts:
+                lines.append(f"{INDENT}pass")
+            for s in stmts:
+                lines.extend(_indent_block(self._emit_statement(s), 1))
+        if otherwise_node is not None:
+            lines.append("else:")
+            for s in otherwise_node.children:
                 lines.extend(_indent_block(self._emit_statement(s), 1))
         return lines
 
     def _stmt_while_stmt(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
-        body = node.children[1:]
-        lines = [f"while {expr}:"]
+        timeout = self._extract_timeout(node)
+        body = [c for c in node.children[1:] if not (isinstance(c, Tree) and c.data == "timeout_clause")]
+        if timeout:
+            # convert `while EXPR do BODY with timeout T` into a time-limited while loop
+            lines = [
+                f"_deadline = __import__('time').time() + {timeout}",
+                f"while ({expr}) and __import__('time').time() < _deadline:",
+            ]
+        else:
+            lines = [f"while {expr}:"]
         if not body:
             lines.append(f"{INDENT}pass")
         else:
@@ -240,9 +277,14 @@ class _Emitter:
         return lines
 
     def _stmt_repeat_stmt(self, node: Tree) -> List[str]:
-        body = node.children[:-1]
-        cond = self._emit_expression(node.children[-1])
-        lines = ["while True:"]
+        timeout = self._extract_timeout(node)
+        non_timeout = [c for c in node.children if not (isinstance(c, Tree) and c.data == "timeout_clause")]
+        body = non_timeout[:-1]
+        cond = self._emit_expression(non_timeout[-1])
+        lines = []
+        if timeout:
+            lines.append(f"_deadline = __import__('time').time() + {timeout}")
+        lines.append("while True:")
         if not body:
             lines.append(f"{INDENT}pass")
         else:
@@ -250,15 +292,28 @@ class _Emitter:
                 lines.extend(_indent_block(self._emit_statement(s), 1))
         lines.append(f"{INDENT}if {cond}:")
         lines.append(f"{INDENT}{INDENT}break")
+        if timeout:
+            lines.append(f"{INDENT}if __import__('time').time() >= _deadline:")
+            lines.append(f"{INDENT}{INDENT}break")
         return lines
 
     def _stmt_wait_for_event(self, node: Tree) -> List[str]:
         ev = _text_of_name(node.children[0])
-        return [f'wait_for_event(proc, "{ev}")']
+        timeout = self._extract_timeout(node)
+        timeout_arg = f", timeout={timeout}" if timeout else ""
+        return [f'wait_for_event(proc, "{ev}"{timeout_arg})']
 
     def _stmt_wait_until_expr(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
-        return [f"wait_until(lambda: {expr})"]
+        timeout = self._extract_timeout(node)
+        timeout_arg = f", timeout={timeout}" if timeout else ""
+        return [f"wait_until(lambda: {expr}{timeout_arg})"]
+
+    def _extract_timeout(self, node: Tree) -> str | None:
+        for child in node.children:
+            if isinstance(child, Tree) and child.data == "timeout_clause":
+                return self._emit_expression(child.children[0])
+        return None
 
     def _stmt_assign_stmt(self, node: Tree) -> List[str]:
         var = _py_ident(_text_of_name(node.children[0]))
