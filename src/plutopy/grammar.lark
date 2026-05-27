@@ -129,11 +129,17 @@ save_context_entry: "to" qname "by" name
 switch_on:  "Switch" "on"  qname activity_with?
 switch_off: "Switch" "off" qname activity_with?
 
-// `with NAME := EXPR, NAME := EXPR end with` argument clause (spec A.3.9.28).
-// Simplified subset: only named simple arguments — records, arrays, value
-// sets and directives are out of scope for this implementation.
-activity_with: "with" argument ("," argument)* "end" "with"
-argument: name ":=" expression
+// Activity argument clause (spec A.3.9.28).
+// Supports three argument shapes, all named:
+//   simple:  Mode := "safe"
+//   record:  Telecommand record Foo := 1, Bar := "x" end record
+//   array:   Values     array  1, 2, 3 end array
+// `with value set` and `with directives` clauses are out of scope.
+activity_with: "with" arg_item ("," arg_item)* "end" "with"
+?arg_item: simple_arg | record_arg | array_arg
+simple_arg: name ":=" expression
+record_arg: name "record" simple_arg ("," simple_arg)* "end" "record"
+array_arg:  name "array"  expression  ("," expression)*  "end" "array"
 
 // ---- names ----
 name: WORD (WORD)*

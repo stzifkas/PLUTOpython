@@ -345,8 +345,21 @@ def _format_activity_with(tail) -> str:
             parts = []
             for arg in c.children:
                 name = _text_of_name(arg.children[0])
-                value = _format_expression(arg.children[1])
-                parts.append(f"{name} := {value}")
+                if arg.data == "simple_arg":
+                    value = _format_expression(arg.children[1])
+                    parts.append(f"{name} := {value}")
+                elif arg.data == "record_arg":
+                    rec = []
+                    for sub in arg.children[1:]:
+                        sub_name = _text_of_name(sub.children[0])
+                        sub_value = _format_expression(sub.children[1])
+                        rec.append(f"{sub_name} := {sub_value}")
+                    parts.append(f"{name} record " + ", ".join(rec) + " end record")
+                elif arg.data == "array_arg":
+                    elements = [_format_expression(e) for e in arg.children[1:]]
+                    parts.append(f"{name} array " + ", ".join(elements) + " end array")
+                else:
+                    parts.append(f"// unsupported arg: {arg.data}")
             return " with " + ", ".join(parts) + " end with"
     return ""
 

@@ -696,18 +696,31 @@ class _Emitter:
         raise TranspileError(f"unsupported activity: {node.data}")
 
     def _emit_activity_args(self, tail_children) -> str:
-        """If the activity call carries an `activity_with` clause, emit the
-        kwarg `, arguments={"NAME": EXPR, ...}` to append to the call.
+        """Emit `, arguments={…}` for an `activity_with` clause.
 
-        Each EXPR is the transpiled Python form of the PLUTO expression.
+        Supports simple / record / array argument shapes (spec A.3.9.28).
+        A record arg becomes a nested dict; an array arg becomes a list.
         """
         for c in tail_children:
             if isinstance(c, Tree) and c.data == "activity_with":
                 items = []
                 for arg in c.children:
                     name = _text_of_name(arg.children[0])
-                    value = self._emit_expression(arg.children[1])
-                    items.append(f'"{name}": {value}')
+                    if arg.data == "simple_arg":
+                        value = self._emit_expression(arg.children[1])
+                        items.append(f'"{name}": {value}')
+                    elif arg.data == "record_arg":
+                        rec_parts = []
+                        for sub in arg.children[1:]:
+                            sub_name = _text_of_name(sub.children[0])
+                            sub_value = self._emit_expression(sub.children[1])
+                            rec_parts.append(f'"{sub_name}": {sub_value}')
+                        items.append(f'"{name}": {{{", ".join(rec_parts)}}}')
+                    elif arg.data == "array_arg":
+                        elements = [self._emit_expression(e) for e in arg.children[1:]]
+                        items.append(f'"{name}": [{", ".join(elements)}]')
+                    else:
+                        raise TranspileError(f"unsupported argument shape: {arg.data}")
                 if not items:
                     return ""
                 return f', arguments={{{", ".join(items)}}}'

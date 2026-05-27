@@ -284,10 +284,19 @@ def _activity_call_to_dict(node: Tree) -> Dict[str, Any]:
     out: Dict[str, Any] = {"verb": verb, "target": _qname_text(node.children[0])}
     for c in node.children[1:]:
         if isinstance(c, Tree) and c.data == "activity_with":
-            out["arguments"] = {
-                _name_text(arg.children[0]): _expression_to_str(arg.children[1])
-                for arg in c.children
-            }
+            args: Dict[str, Any] = {}
+            for arg in c.children:
+                name = _name_text(arg.children[0])
+                if arg.data == "simple_arg":
+                    args[name] = _expression_to_str(arg.children[1])
+                elif arg.data == "record_arg":
+                    args[name] = {
+                        _name_text(sub.children[0]): _expression_to_str(sub.children[1])
+                        for sub in arg.children[1:]
+                    }
+                elif arg.data == "array_arg":
+                    args[name] = [_expression_to_str(e) for e in arg.children[1:]]
+            out["arguments"] = args
     return out
 
 

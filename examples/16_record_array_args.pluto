@@ -1,0 +1,23 @@
+// Record and array activity arguments (PLUTO spec A.3.9.28).
+//
+// `with` supports three argument shapes:
+//   simple:  Mode := "safe"
+//   record:  Telecommand record Foo := 1, Bar := "x" end record
+//   array:   Values     array  1, 2, 3 end array
+//
+// Different shapes can be mixed in one with-clause.
+procedure
+    main
+      initiate and confirm Switch on Subsystem of Spacecraft
+        with
+          Mode := "nominal",
+          Telecommand record
+            ServiceType := 8,
+            ServiceSubtype := 1,
+            ApplicationID := 100
+          end record,
+          ReleaseTimes array 1000, 1500, 2000 end array
+        end with
+      inform user "TC bundle sent"
+    end main
+end procedure

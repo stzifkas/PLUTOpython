@@ -37,6 +37,7 @@ Tag [`v0.1-gsoc-2019`](https://github.com/stzifkas/PLUTOpython/releases/tag/v0.1
 | Formatter | `plutopy fmt` — idempotent canonical pretty-printer; `--check` mode for CI gating |
 | Generator | `plutopy gen spec.yaml` — declarative YAML → PLUTO scaffold for templating procedures |
 | Playground | Browser-based PLUTO compiler and runner, no install required, served from `/playground/` on the docs site |
+| ECSS-E-ST-70-32C coverage | Procedure/step sub-bodies (A.1.7), property references (A.3.9.8), set-context (A.3.9.10), step + activity refer-by (A.3.9.12, A.3.9.26, A.3.9.27), record + array activity arguments (A.3.9.28), reporting data + `save context` (A.3.9.5, A.3.9.25), continuation tests with all seven actions (A.3.9.33) |
 
 ## AI-assisted revival
 
