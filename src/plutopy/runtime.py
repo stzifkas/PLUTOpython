@@ -220,9 +220,25 @@ class Step:
             raise
 
 
-def initiate_and_confirm_step(name: str, body: Callable[[], None]) -> Step:
+def initiate_and_confirm_step(proc, name: str, body: Callable[[], None]) -> Step:
+    """Run a named step. The step is registered with the Procedure so its
+    execution_status / start_time / completion_time / confirmation_status
+    can be queried via PLUTO `<property> of <step_name>` references."""
+    act_exec = proc.register_activity(name)
     step = Step(name, body)
-    step.run()
+    from datetime import datetime
+    act_exec.start_time = datetime.now()
+    act_exec.execution_status = "executing"
+    try:
+        step.run()
+        act_exec.execution_status = "success"
+        act_exec.confirmation_status = "success"
+    except Exception as e:
+        act_exec.execution_status = "failure"
+        act_exec.confirmation_status = str(e)
+        raise
+    finally:
+        act_exec.completion_time = datetime.now()
     return step
 
 

@@ -287,7 +287,7 @@ class _Emitter:
         else:
             for s in body_stmts:
                 lines.extend(_indent_block(self._emit_statement(s), 1))
-        lines.append(f'{self._await}initiate_and_confirm_step("{step_name}", {fn_name})')
+        lines.append(f'{self._await}initiate_and_confirm_step({self._receiver}, "{step_name}", {fn_name})')
         return lines
 
     def _stmt_parallel_all_stmt(self, node: Tree) -> List[str]:
@@ -501,22 +501,17 @@ class _Emitter:
 
     def _emit_property_request(self, node) -> str:
         """Emit code to get an activity property.
-        
-        Translates: execution_status of Star Tracker1
-        To: proc.get_property("Star Tracker1", "execution_status")
+
+        Translates: execution_status of CHECK_TRACKER
+        To: proc.get_property("CHECK_TRACKER", "execution_status")
+
+        `node` is the property_request tree with two children:
+        a `property_name` tree (children are WORD tokens) and a `qname`.
         """
-        # node.children[0] is property_request tree
-        # tree has: property_name, "of", qname
-        prop_req = node
-        prop_name_node = prop_req.children[0]
-        qname_node = prop_req.children[1]
-        
-        # Extract property name (e.g., "execution_status")
-        prop_name = _text_of_qname(prop_name_node)
-        
-        # Extract activity name (e.g., "Star Tracker1")
+        prop_name_node = node.children[0]
+        qname_node = node.children[1]
+        prop_name = _text_of_name(prop_name_node)
         activity_name = _text_of_qname(qname_node)
-        
         return f'{self._receiver}.get_property("{activity_name}", "{prop_name}")'
 
 

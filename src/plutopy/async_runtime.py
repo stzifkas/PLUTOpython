@@ -204,9 +204,25 @@ class Step:
             raise
 
 
-async def initiate_and_confirm_step(name: str, body: Callable[[], Awaitable[None]]) -> Step:
+async def initiate_and_confirm_step(proc: "Procedure", name: str,
+                                    body: Callable[[], Awaitable[None]]) -> Step:
+    """Run a named step. The step is registered with the Procedure so its
+    execution properties can be queried via PLUTO `<property> of <step_name>`
+    references."""
+    act_exec = proc.register_activity(name)
     step = Step(name, body)
-    await step.run()
+    act_exec.start_time = datetime.now()
+    act_exec.execution_status = "executing"
+    try:
+        await step.run()
+        act_exec.execution_status = "success"
+        act_exec.confirmation_status = "success"
+    except Exception as e:
+        act_exec.execution_status = "failure"
+        act_exec.confirmation_status = str(e)
+        raise
+    finally:
+        act_exec.completion_time = datetime.now()
     return step
 
 
@@ -299,7 +315,16 @@ class Procedure:
         return act
 
     def get_property(self, activity_name: str, property_name: str) -> Any:
+        """Read a property of a tracked activity / step.
+
+        For `execution_status` specifically, a step that has not yet been
+        initiated returns "not_initiated" rather than raising — this matches
+        the PLUTO spec's lifecycle: every activity has a defined status
+        even before it starts.
+        """
         if activity_name not in self._activities:
+            if property_name == "execution_status":
+                return "not_initiated"
             raise PlutoRuntimeError(f"activity not tracked: {activity_name!r}")
         return self._activities[activity_name].get_property(property_name)
 
