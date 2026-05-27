@@ -1,0 +1,14 @@
+// While loop and for loop driving multiple activities.
+procedure
+    main
+      counter := 0
+      while counter < 3 do
+        log "loop iteration"
+        counter := counter + 1
+      end while
+      for i := 1 to 3 do
+        log "for iteration"
+      end for
+      inform user "loops finished"
+    end main
+end procedure

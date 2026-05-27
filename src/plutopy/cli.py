@@ -1,0 +1,71 @@
+"""Command-line interface for plutopy.
+
+Usage:
+    plutopy parse    SCRIPT          # show parse tree
+    plutopy compile  SCRIPT [-o OUT] # emit Python source
+    plutopy run      SCRIPT          # transpile and execute
+"""
+from __future__ import annotations
+
+import argparse
+import pathlib
+import sys
+import tempfile
+
+from plutopy import __version__
+from plutopy.parser import parse as parse_pluto
+from plutopy.transpiler import transpile
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="plutopy", description="PLUTO -> Python transpiler")
+    ap.add_argument("--version", action="version", version=f"plutopy {__version__}")
+    ap.add_argument("-v", "--verbose", action="store_true", help="emit runtime lifecycle logs")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_parse = sub.add_parser("parse", help="show the parse tree of a PLUTO script")
+    p_parse.add_argument("script", type=pathlib.Path)
+
+    p_compile = sub.add_parser("compile", help="transpile to Python")
+    p_compile.add_argument("script", type=pathlib.Path)
+    p_compile.add_argument("-o", "--output", type=pathlib.Path, help="output .py path (default: stdout)")
+
+    p_run = sub.add_parser("run", help="transpile and execute")
+    p_run.add_argument("script", type=pathlib.Path)
+    p_run.add_argument("--keep", action="store_true", help="keep transpiled .py file and print its path")
+
+    args = ap.parse_args(argv)
+
+    if args.verbose:
+        import logging
+        logging.basicConfig(level=logging.INFO, format="%(name)s: %(message)s")
+
+    if args.cmd == "parse":
+        tree = parse_pluto(args.script.read_text())
+        print(tree.pretty())
+        return 0
+
+    if args.cmd == "compile":
+        py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        if args.output:
+            args.output.write_text(py)
+        else:
+            sys.stdout.write(py)
+        return 0
+
+    if args.cmd == "run":
+        py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
+            tmp.write(py)
+            tmp_path = tmp.name
+        if args.keep:
+            print(f"[transpiled to {tmp_path}]", file=sys.stderr)
+        ns: dict = {"__name__": "__main__", "__file__": tmp_path}
+        exec(compile(py, tmp_path, "exec"), ns)
+        return 0
+
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

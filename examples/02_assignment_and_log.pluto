@@ -1,0 +1,13 @@
+// Demonstrates simple variable assignment, expressions, log and inform_user.
+procedure
+    main
+      threshold := 42
+      observed := 40
+      log "before observation"
+      inform user "threshold set to 42"
+      if observed < threshold then
+        log "below threshold"
+        inform user "all clear"
+      end if
+    end main
+end procedure

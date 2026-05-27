@@ -1,0 +1,27 @@
+// A more realistic bring-up procedure: assign a parameter, conditionally
+// switch on redundant hardware, then run the original parallel step pattern.
+procedure
+    declare
+      event boom described by Critical failure
+    end declare
+    main
+      retries := 0
+      while retries < 2 do
+        log "attempting bring up"
+        in parallel until all complete
+          initiate and confirm step BRING UP REACTION WHEEL
+            main
+              initiate and confirm Switch on Reaction Wheel3 of AOC of Satellite;
+            end main
+          end step;
+          initiate and confirm step BRING UP STAR TRACKERS
+            main
+              initiate and confirm Switch on Star Tracker1;
+            end main
+          end step;
+        end parallel
+        retries := retries + 1
+      end while
+      inform user "bring up complete"
+    end main
+end procedure

@@ -1,0 +1,13 @@
+// Event declaration, raise, and a precondition wait.
+procedure
+    declare
+      event ready described by System bring up complete
+    end declare
+    main
+      log "raising ready"
+      raise event ready
+      wait for event ready
+      log "ready observed; continuing"
+      initiate and confirm Switch on Star Tracker1
+    end main
+end procedure

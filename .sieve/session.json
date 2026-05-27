@@ -1,0 +1,14 @@
+{
+  "turn": 4,
+  "track_stats": true,
+  "test_results": [],
+  "seen_errors": [],
+  "read_files": {},
+  "token_stats": {
+    "total_raw_chars": 4072,
+    "total_compressed_chars": 85,
+    "turns_processed": 4,
+    "delta_hits": 0,
+    "dedup_hits": 0
+  }
+}

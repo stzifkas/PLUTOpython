@@ -1,0 +1,106 @@
+// PLUTO grammar (subset of ECSS-E-ST-70-31C)
+// Parsed with Earley; semicolons are ignored as separators so that scripts
+// can use them or newlines interchangeably.
+
+%import common.WS
+%import common.NUMBER
+%import common.ESCAPED_STRING
+%ignore WS
+%ignore /\/\/[^\n]*/
+%ignore ";"
+
+WORD.-10: /[A-Za-z_][A-Za-z0-9_]*/
+
+start: procedure_body
+
+procedure_body: "procedure" section+ "end" "procedure"
+
+?section: declare_section
+        | preconditions_section
+        | main_section
+        | watchdog_section
+        | confirmation_section
+
+// ---- declare ----
+declare_section: "declare" event_decl ("," event_decl)* "end" "declare"
+event_decl: "event" name ("described" "by" description)?
+
+// ---- preconditions ----
+preconditions_section: "preconditions" precondition+ "end" "preconditions"
+?precondition: if_stmt | wait_stmt
+
+// ---- main ----
+main_section: "main" statement+ "end" "main"
+
+// ---- watchdog ----
+watchdog_section: "watchdog" handler+ "end" "watchdog"
+handler: "on" name "do" statement+ "end" "on"
+
+// ---- confirmation ----
+confirmation_section: "confirmation" statement+ "end" "confirmation"
+
+// ---- statements ----
+?statement: initiate_confirm_step
+          | initiate_confirm_stmt
+          | initiate_stmt
+          | parallel_all_stmt
+          | parallel_one_stmt
+          | context_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | repeat_stmt
+          | wait_stmt
+          | assign_stmt
+          | log_stmt
+          | inform_stmt
+          | raise_stmt
+
+initiate_stmt: "initiate" activity_call
+initiate_confirm_stmt: "initiate" "and" "confirm" activity_call
+initiate_confirm_step: "initiate" "and" "confirm" "step" name "main" statement+ "end" "main" "end" "step"
+
+parallel_all_stmt: "in" "parallel" "until" "all" "complete" statement+ "end" "parallel"
+parallel_one_stmt: "in" "parallel" "until" "one" "completes" statement+ "end" "parallel"
+
+context_stmt: "in" "the" "context" "of" qname "do" statement+ "end" "context"
+
+if_stmt: "if" expression "then" statement+ ("else" statement+)? "end" "if"
+while_stmt: "while" expression "do" statement+ "end" "while"
+for_stmt: "for" name ":=" expression "to" expression ("by" expression)? "do" statement+ "end" "for"
+repeat_stmt: "repeat" statement+ "until" expression "end" "repeat"
+
+?wait_stmt: wait_for_event | wait_until_expr
+wait_for_event: "wait" "for" "event" name
+wait_until_expr: "wait" "until" expression
+
+assign_stmt: name ":=" expression
+log_stmt: "log" expression
+inform_stmt: "inform" "user" expression
+raise_stmt: "raise" "event" name
+
+// ---- activity calls ----
+?activity_call: switch_on | switch_off
+switch_on: "Switch" "on" qname
+switch_off: "Switch" "off" qname
+
+// ---- names ----
+name: WORD (WORD)*
+qname: name ("of" name)*
+description: WORD (WORD)*
+
+// ---- expressions ----
+?expression: or_expr
+?or_expr: and_expr ("or" and_expr)*
+?and_expr: not_expr ("and" not_expr)*
+?not_expr: "not" not_expr -> not_op | comparison
+?comparison: arith (CMP_OP arith)?
+CMP_OP: ">=" | "<=" | "<>" | ">" | "<" | "="
+?arith: term (ADD_OP term)*
+ADD_OP: "+" | "-"
+?term: factor (MUL_OP factor)*
+MUL_OP: "*" | "/"
+?factor: NUMBER         -> num_lit
+       | ESCAPED_STRING -> str_lit
+       | qname          -> var_ref
+       | "(" expression ")"
