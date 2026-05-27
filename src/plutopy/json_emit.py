@@ -229,6 +229,15 @@ def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
         return {"kind": "inform_user", "value": _expression_to_str(stmt.children[0])}
     if d == "raise_stmt":
         return {"kind": "raise", "event": _name_text(stmt.children[0])}
+    if d == "save_context_stmt":
+        return {
+            "kind": "save_context",
+            "entries": [
+                {"ref": _qname_text(entry.children[0]),
+                 "local": _name_text(entry.children[1])}
+                for entry in stmt.children
+            ],
+        }
     return {"kind": "unknown", "rule": d}
 
 

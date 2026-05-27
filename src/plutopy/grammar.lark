@@ -56,6 +56,7 @@ confirmation_section: "confirmation" statement+ "end" "confirmation"
           | log_stmt
           | inform_stmt
           | raise_stmt
+          | save_context_stmt
 
 initiate_stmt: "initiate" activity_call refer_by?
 refer_by: "refer" "by" name
@@ -118,6 +119,10 @@ assign_stmt: name ":=" expression
 log_stmt: "log" expression
 inform_stmt: "inform" "user" expression
 raise_stmt: "raise" "event" name
+
+// save context: snapshot reporting data into local names (spec A.3.9.5 / A.3.9.25)
+save_context_stmt: "save" "context" "refer" save_context_entry ("," save_context_entry)*
+save_context_entry: "to" qname "by" name
 
 // ---- activity calls ----
 ?activity_call: switch_on | switch_off

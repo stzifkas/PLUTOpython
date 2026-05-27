@@ -56,6 +56,36 @@ class SystemElement:
 
 
 @dataclass
+class ReportingData:
+    """Telemetry parameter / reporting data (PLUTO spec A.3.9.8).
+
+    Properties queryable via PLUTO `<property> of <ref>` expressions:
+        value, engineering_value, validity_status, sampling_time.
+    """
+    name: str
+    value: Any = None
+    engineering_value: Any = None
+    validity_status: str = "invalid"
+    sampling_time: "Optional[datetime]" = None
+
+    def get_property(self, prop: str) -> Any:
+        if prop in ("value",):
+            return self.value
+        if prop == "engineering_value":
+            return self.engineering_value if self.engineering_value is not None else self.value
+        if prop == "validity_status":
+            return self.validity_status
+        if prop == "sampling_time":
+            return self.sampling_time
+        raise PlutoRuntimeError(f"unknown reporting data property: {prop!r}")
+
+    def current_value(self) -> Any:
+        """Return the reading used when the parameter is named in an
+        expression (engineering value if set, otherwise raw value)."""
+        return self.engineering_value if self.engineering_value is not None else self.value
+
+
+@dataclass
 class Activity:
     name: str
     target: str
@@ -95,6 +125,24 @@ class ActivityExecution:
 
 _systems: Dict[str, SystemElement] = {}
 _activities: Dict[tuple, Activity] = {}
+_reporting_data: Dict[str, ReportingData] = {}
+
+
+def register_reporting_data(rd: ReportingData) -> ReportingData:
+    """Make a parameter available to PLUTO references and save_context."""
+    _reporting_data[rd.name] = rd
+    return rd
+
+
+def resolve_reporting_data(ref: str) -> Optional[ReportingData]:
+    """Look up by exact name first, then by the leading qualifier
+    (`Temperature of Battery1` -> falls back to `Temperature` if needed)."""
+    if ref in _reporting_data:
+        return _reporting_data[ref]
+    head = ref.split(" of ")[0].strip()
+    if head in _reporting_data:
+        return _reporting_data[head]
+    return None
 
 
 def register_system(elem: SystemElement) -> SystemElement:
@@ -350,6 +398,9 @@ class Procedure:
     variables: Dict[str, Any] = field(default_factory=dict)
     watchdog_handlers: Dict[str, Callable[[], None]] = field(default_factory=dict)
     _activities: Dict[str, ActivityExecution] = field(default_factory=dict)
+    # Local snapshots created by `save context refer to <ref> by <local_name>`
+    # (PLUTO spec A.3.9.5 / A.3.9.25).
+    reporting_data: Dict[str, ReportingData] = field(default_factory=dict)
 
     def declare_event(self, event: Event) -> Event:
         self.events[event.name] = event
@@ -373,11 +424,71 @@ class Procedure:
         self._activities[activity_name] = act
         return act
 
-    def get_property(self, activity_name: str, property_name: str) -> Any:
-        """Get a property of a tracked activity."""
-        if activity_name not in self._activities:
-            raise PlutoRuntimeError(f"activity not tracked: {activity_name!r}")
-        return self._activities[activity_name].get_property(property_name)
+    def get_property(self, ref: str, property_name: str) -> Any:
+        """Read a property of an object reference.
+
+        Resolution order (simplified A.3.9.8 precedence):
+          1. tracked activity / step instance on this procedure;
+          2. local reporting-data snapshot;
+          3. global reporting-data registry (leading-name fallback).
+
+        For `execution_status`, an unknown reference returns
+        "not_initiated" — a step that hasn't run yet is a valid PLUTO
+        state, not an error.
+        """
+        if ref in self._activities:
+            return self._activities[ref].get_property(property_name)
+        if ref in self.reporting_data:
+            return self.reporting_data[ref].get_property(property_name)
+        rd = resolve_reporting_data(ref)
+        if rd is not None:
+            return rd.get_property(property_name)
+        if property_name == "execution_status":
+            return "not_initiated"
+        raise PlutoRuntimeError(f"unknown reference: {ref!r}")
+
+    def resolve_ref(self, name: str, default: Any = None) -> Any:
+        """Resolve a qualified name used as a value in an expression.
+
+        Looks up local variables, then local reporting-data snapshots,
+        then the global registry. Returns `default` (or the name itself)
+        if nothing matches.
+        """
+        if name in self.variables:
+            return self.variables[name]
+        if name in self.reporting_data:
+            return self.reporting_data[name].current_value()
+        rd = resolve_reporting_data(name)
+        if rd is not None:
+            return rd.current_value()
+        return default if default is not None else name
+
+    def save_context(self, entries: List[tuple]) -> None:
+        """`save context refer to <ref> by <local_name> (, to <ref> by <name>)*`
+
+        Snapshots one or more reporting data so subsequent reads see
+        consistent values from the same point in time (spec A.3.9.5).
+        If a referenced parameter is not registered, an "invalid"
+        snapshot with value=None is stored so the procedure can still
+        query validity_status without erroring out.
+        """
+        for ref, local in entries:
+            src = resolve_reporting_data(ref)
+            if src is None:
+                snap = ReportingData(
+                    name=local, value=None,
+                    validity_status="not available",
+                    sampling_time=datetime.now(),
+                )
+            else:
+                snap = ReportingData(
+                    name=local,
+                    value=src.value,
+                    engineering_value=src.engineering_value,
+                    validity_status=src.validity_status,
+                    sampling_time=src.sampling_time or datetime.now(),
+                )
+            self.reporting_data[local] = snap
 
     def start(self) -> None:
         self.execution_status = "executing"

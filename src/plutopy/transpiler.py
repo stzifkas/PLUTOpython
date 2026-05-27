@@ -675,6 +675,14 @@ class _Emitter:
         ev = _text_of_name(node.children[0])
         return [f'{self._await}{self._receiver}.raise_event("{ev}")']
 
+    def _stmt_save_context_stmt(self, node: Tree) -> List[str]:
+        items = []
+        for entry in node.children:
+            ref = _text_of_qname(entry.children[0])
+            local = _text_of_name(entry.children[1])
+            items.append(f'("{ref}", "{local}")')
+        return [f"{self._receiver}.save_context([{', '.join(items)}])"]
+
     # ---- activity calls ----
     def _emit_activity_call(self, node: Tree) -> str:
         if node.data == "switch_on":
@@ -811,11 +819,14 @@ def _is_expression(node) -> bool:
 
 
 def _ref_to_python(qn: str, receiver: str) -> str:
-    """Resolve a PLUTO qualified reference at runtime via the procedure scope."""
-    if " of " not in qn:
-        ident = _py_ident(qn)
-        return f'{receiver}.variables.get("{ident}", {ident!r})'
-    return f'{receiver}.variables.get({qn!r}, {qn!r})'
+    """Resolve any PLUTO reference at runtime via `Procedure.resolve_ref`.
+
+    `resolve_ref` walks local variables -> local reporting-data snapshots
+    -> the global reporting-data registry, matching the spec A.3.9.8
+    precedence. Falls back to the name itself as a string when nothing
+    matches (preserving the previous behaviour for unknown names).
+    """
+    return f'{receiver}.resolve_ref({qn!r})'
 
 
 def _py_ident(name: str) -> str:

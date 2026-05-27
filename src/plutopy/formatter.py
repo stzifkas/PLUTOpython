@@ -155,6 +155,13 @@ def _format_statement(stmt: Tree, depth: int) -> List[str]:
         return [f"{pad}inform user {_format_expression(stmt.children[0])}"]
     if d == "raise_stmt":
         return [f"{pad}raise event {_text_of_name(stmt.children[0])}"]
+    if d == "save_context_stmt":
+        entries = []
+        for entry in stmt.children:
+            ref = _text_of_qname(entry.children[0])
+            local = _text_of_name(entry.children[1])
+            entries.append(f"to {ref} by {local}")
+        return [f"{pad}save context refer " + ", ".join(entries)]
     return [f"{pad}// unsupported statement: {d}"]
 
 

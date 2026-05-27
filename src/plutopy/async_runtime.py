@@ -52,6 +52,47 @@ class Event:
 
 
 @dataclass
+class ReportingData:
+    """Telemetry parameter / reporting data (PLUTO spec A.3.9.8)."""
+    name: str
+    value: Any = None
+    engineering_value: Any = None
+    validity_status: str = "invalid"
+    sampling_time: Optional[datetime] = None
+
+    def get_property(self, prop: str) -> Any:
+        if prop == "value":
+            return self.value
+        if prop == "engineering_value":
+            return self.engineering_value if self.engineering_value is not None else self.value
+        if prop == "validity_status":
+            return self.validity_status
+        if prop == "sampling_time":
+            return self.sampling_time
+        raise PlutoRuntimeError(f"unknown reporting data property: {prop!r}")
+
+    def current_value(self) -> Any:
+        return self.engineering_value if self.engineering_value is not None else self.value
+
+
+_reporting_data: Dict[str, "ReportingData"] = {}
+
+
+def register_reporting_data(rd: ReportingData) -> ReportingData:
+    _reporting_data[rd.name] = rd
+    return rd
+
+
+def resolve_reporting_data(ref: str) -> Optional[ReportingData]:
+    if ref in _reporting_data:
+        return _reporting_data[ref]
+    head = ref.split(" of ")[0].strip()
+    if head in _reporting_data:
+        return _reporting_data[head]
+    return None
+
+
+@dataclass
 class SystemElement:
     name: str
     kind: str = "part"
@@ -325,6 +366,7 @@ class Procedure:
     variables: Dict[str, Any] = field(default_factory=dict)
     watchdog_handlers: Dict[str, Callable[[], Awaitable[None]]] = field(default_factory=dict)
     _activities: Dict[str, ActivityExecution] = field(default_factory=dict)
+    reporting_data: Dict[str, "ReportingData"] = field(default_factory=dict)
 
     def declare_event(self, event: Event) -> Event:
         self.events[event.name] = event
@@ -350,19 +392,48 @@ class Procedure:
         self._activities[activity_name] = act
         return act
 
-    def get_property(self, activity_name: str, property_name: str) -> Any:
-        """Read a property of a tracked activity / step.
+    def get_property(self, ref: str, property_name: str) -> Any:
+        """Read a property of an object reference: activity instance,
+        local reporting-data snapshot, or the global registry."""
+        if ref in self._activities:
+            return self._activities[ref].get_property(property_name)
+        if ref in self.reporting_data:
+            return self.reporting_data[ref].get_property(property_name)
+        rd = resolve_reporting_data(ref)
+        if rd is not None:
+            return rd.get_property(property_name)
+        if property_name == "execution_status":
+            return "not_initiated"
+        raise PlutoRuntimeError(f"unknown reference: {ref!r}")
 
-        For `execution_status` specifically, a step that has not yet been
-        initiated returns "not_initiated" rather than raising — this matches
-        the PLUTO spec's lifecycle: every activity has a defined status
-        even before it starts.
-        """
-        if activity_name not in self._activities:
-            if property_name == "execution_status":
-                return "not_initiated"
-            raise PlutoRuntimeError(f"activity not tracked: {activity_name!r}")
-        return self._activities[activity_name].get_property(property_name)
+    def resolve_ref(self, name: str, default: Any = None) -> Any:
+        if name in self.variables:
+            return self.variables[name]
+        if name in self.reporting_data:
+            return self.reporting_data[name].current_value()
+        rd = resolve_reporting_data(name)
+        if rd is not None:
+            return rd.current_value()
+        return default if default is not None else name
+
+    def save_context(self, entries: List[tuple]) -> None:
+        for ref, local in entries:
+            src = resolve_reporting_data(ref)
+            if src is None:
+                snap = ReportingData(
+                    name=local, value=None,
+                    validity_status="not available",
+                    sampling_time=datetime.now(),
+                )
+            else:
+                snap = ReportingData(
+                    name=local,
+                    value=src.value,
+                    engineering_value=src.engineering_value,
+                    validity_status=src.validity_status,
+                    sampling_time=src.sampling_time or datetime.now(),
+                )
+            self.reporting_data[local] = snap
 
     def start(self) -> None:
         self.execution_status = "executing"

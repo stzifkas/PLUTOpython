@@ -7,10 +7,13 @@ from plutopy.runtime import (
     Event,
     SystemElement,
     Activity,
+    ReportingData,
     register_system,
     register_activity,
+    register_reporting_data,
     resolve_system,
     resolve_activity,
+    resolve_reporting_data,
 )
 
 __all__ = [
@@ -19,8 +22,11 @@ __all__ = [
     "Event",
     "SystemElement",
     "Activity",
+    "ReportingData",
     "register_system",
     "register_activity",
+    "register_reporting_data",
     "resolve_system",
     "resolve_activity",
+    "resolve_reporting_data",
 ]
