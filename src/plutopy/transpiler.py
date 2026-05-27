@@ -20,6 +20,7 @@ class TranspileError(Exception):
 
 
 VALID_RUNTIMES = ("threaded", "async")
+VALID_STYLES = ("functions", "class")
 
 
 def transpile(
@@ -28,22 +29,28 @@ def transpile(
     module_doc: str | None = None,
     filename: str | None = None,
     runtime: str = "threaded",
+    style: str = "functions",
 ) -> str:
     """Transpile a PLUTO source string into runnable Python source.
 
     `runtime`:
-      - "threaded" (default): emits `def main()` against `plutopy.runtime`,
-        using threads for parallel sections.
-      - "async": emits `async def main()` against `plutopy.async_runtime`,
-        using `asyncio.gather` and awaitables.
+      - "threaded" (default): emits against `plutopy.runtime`, threads-based.
+      - "async": emits against `plutopy.async_runtime`, asyncio-based.
+
+    `style`:
+      - "functions" (default): emits `def main():` (or `async def main():`).
+      - "class": emits a `TranspiledProcedure(Procedure)` subclass with
+        declarations in `__init__` and main body in `run()`.
     """
     if runtime not in VALID_RUNTIMES:
         raise TranspileError(f"unknown runtime: {runtime!r}; expected one of {VALID_RUNTIMES}")
+    if style not in VALID_STYLES:
+        raise TranspileError(f"unknown style: {style!r}; expected one of {VALID_STYLES}")
     tree = parse_pluto(source, filename=filename)
-    emitter = _Emitter(runtime=runtime)
+    emitter = _Emitter(runtime=runtime, style=style)
     body = emitter.emit_procedure(tree.children[0])
     header = _module_header(module_doc, runtime=runtime)
-    return header + body + _module_footer(runtime=runtime)
+    return header + body + _module_footer(runtime=runtime, style=style)
 
 
 def _module_header(doc: str | None, *, runtime: str) -> str:
@@ -62,14 +69,17 @@ def _module_header(doc: str | None, *, runtime: str) -> str:
     )
 
 
-def _module_footer(*, runtime: str) -> str:
+def _module_footer(*, runtime: str, style: str = "functions") -> str:
+    invocation = (
+        "TranspiledProcedure().run()" if style == "class" else "main()"
+    )
     if runtime == "async":
         return (
             "\n\nif __name__ == \"__main__\":\n"
             + INDENT + "import asyncio\n"
-            + INDENT + "asyncio.run(main())\n"
+            + INDENT + f"asyncio.run({invocation})\n"
         )
-    return "\n\nif __name__ == \"__main__\":\n" + INDENT + "main()\n"
+    return "\n\nif __name__ == \"__main__\":\n" + INDENT + f"{invocation}\n"
 
 
 def _join(lines: List[str], depth: int) -> str:
@@ -92,11 +102,15 @@ def _text_of_description(node: Tree) -> str:
 
 
 class _Emitter:
-    def __init__(self, *, runtime: str = "threaded") -> None:
+    def __init__(self, *, runtime: str = "threaded", style: str = "functions") -> None:
         self._step_counter = 0
         self._var_counter = 0
         self._runtime = runtime
         self._is_async = runtime == "async"
+        self._style = style
+        self._is_class = style == "class"
+        # `proc` for function style, `self` when the body is a method.
+        self._receiver = "self" if self._is_class else "proc"
 
     # async helpers
     @property
@@ -125,6 +139,11 @@ class _Emitter:
             elif tag == "confirmation_section":
                 confirmation = s
 
+        if self._is_class:
+            return self._emit_class(declare, watchdog, preconds, main, confirmation)
+        return self._emit_functions(declare, watchdog, preconds, main, confirmation)
+
+    def _emit_functions(self, declare, watchdog, preconds, main, confirmation) -> str:
         lines: List[str] = []
         lines.append(f"{self._def} main():")
         lines.append(f'{INDENT}proc = Procedure("transpiled")')
@@ -137,18 +156,7 @@ class _Emitter:
 
         if watchdog is not None:
             lines.append(f"{INDENT}# --- watchdog handlers ---")
-            for handler in watchdog.children:
-                ev_name = _text_of_name(handler.children[0])
-                self._step_counter += 1
-                fn_name = f"_watchdog_{self._step_counter}"
-                lines.append(f"{INDENT}{self._def} {fn_name}():")
-                body = handler.children[1:]
-                if not body:
-                    lines.append(f"{INDENT}{INDENT}pass")
-                else:
-                    for s in body:
-                        lines.extend(_indent_block(self._emit_statement(s), 2))
-                lines.append(f'{INDENT}proc.register_watchdog("{ev_name}", {fn_name})')
+            lines.extend(_indent_block(self._emit_watchdogs(watchdog), 1))
 
         if preconds is not None:
             lines.append(f"{INDENT}# --- preconditions ---")
@@ -168,12 +176,66 @@ class _Emitter:
         lines.append(f"{INDENT}proc.finish()")
         return "\n".join(lines) + "\n"
 
+    def _emit_class(self, declare, watchdog, preconds, main, confirmation) -> str:
+        lines: List[str] = []
+        lines.append("class TranspiledProcedure(Procedure):")
+        lines.append(f"{INDENT}def __init__(self):")
+        lines.append(f'{INDENT}{INDENT}super().__init__("transpiled")')
+
+        if declare is not None:
+            lines.append(f"{INDENT}{INDENT}# --- declarations ---")
+            for decl in declare.children:
+                lines.append(f"{INDENT}{INDENT}{self._emit_event_decl(decl)}")
+
+        if watchdog is not None:
+            lines.append(f"{INDENT}{INDENT}# --- watchdog handlers ---")
+            lines.extend(_indent_block(self._emit_watchdogs(watchdog), 2))
+
+        lines.append("")
+        lines.append(f"{INDENT}{self._def} run(self):")
+        lines.append(f"{INDENT}{INDENT}self.start()")
+
+        if preconds is not None:
+            lines.append(f"{INDENT}{INDENT}# --- preconditions ---")
+            for pre in preconds.children:
+                lines.extend(_indent_block(self._emit_statement(pre), 2))
+
+        if main is not None:
+            lines.append(f"{INDENT}{INDENT}# --- main ---")
+            for stmt in main.children:
+                lines.extend(_indent_block(self._emit_statement(stmt), 2))
+
+        if confirmation is not None:
+            lines.append(f"{INDENT}{INDENT}# --- confirmation ---")
+            for stmt in confirmation.children:
+                lines.extend(_indent_block(self._emit_statement(stmt), 2))
+
+        lines.append(f"{INDENT}{INDENT}self.finish()")
+        return "\n".join(lines) + "\n"
+
+    def _emit_watchdogs(self, watchdog: Tree) -> List[str]:
+        """Emit handler definitions and registrations. Returns lines at depth 0."""
+        out: List[str] = []
+        for handler in watchdog.children:
+            ev_name = _text_of_name(handler.children[0])
+            self._step_counter += 1
+            fn_name = f"_watchdog_{self._step_counter}"
+            out.append(f"{self._def} {fn_name}():")
+            body = handler.children[1:]
+            if not body:
+                out.append(f"{INDENT}pass")
+            else:
+                for s in body:
+                    out.extend(_indent_block(self._emit_statement(s), 1))
+            out.append(f'{self._receiver}.register_watchdog("{ev_name}", {fn_name})')
+        return out
+
     def _emit_event_decl(self, decl: Tree) -> str:
         name = _text_of_name(decl.children[0])
         if len(decl.children) > 1:
             desc = _text_of_description(decl.children[1])
-            return f'proc.declare_event(Event("{name}", description={desc!r}))'
-        return f'proc.declare_event(Event("{name}"))'
+            return f'{self._receiver}.declare_event(Event("{name}", description={desc!r}))'
+        return f'{self._receiver}.declare_event(Event("{name}"))'
 
     # ---- statements: each returns a list of lines (no leading indent) ----
     def _emit_statement(self, stmt: Tree) -> List[str]:
@@ -337,7 +399,7 @@ class _Emitter:
         ev = _text_of_name(node.children[0])
         timeout = self._extract_timeout(node)
         timeout_arg = f", timeout={timeout}" if timeout else ""
-        return [f'{self._await}wait_for_event(proc, "{ev}"{timeout_arg})']
+        return [f'{self._await}wait_for_event({self._receiver}, "{ev}"{timeout_arg})']
 
     def _stmt_wait_until_expr(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
@@ -354,7 +416,7 @@ class _Emitter:
     def _stmt_assign_stmt(self, node: Tree) -> List[str]:
         var = _py_ident(_text_of_name(node.children[0]))
         expr = self._emit_expression(node.children[1])
-        return [f"{var} = {expr}", f'proc.variables["{var}"] = {var}']
+        return [f"{var} = {expr}", f'{self._receiver}.variables["{var}"] = {var}']
 
     def _stmt_log_stmt(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
@@ -366,7 +428,7 @@ class _Emitter:
 
     def _stmt_raise_stmt(self, node: Tree) -> List[str]:
         ev = _text_of_name(node.children[0])
-        return [f'{self._await}proc.raise_event("{ev}")']
+        return [f'{self._await}{self._receiver}.raise_event("{ev}")']
 
     # ---- activity calls ----
     def _emit_activity_call(self, node: Tree) -> str:
@@ -389,7 +451,7 @@ class _Emitter:
             return str(node.children[0])
         if d == "var_ref":
             qn = _text_of_qname(node.children[0])
-            return _ref_to_python(qn)
+            return _ref_to_python(qn, self._receiver)
         if d == "not_op":
             return f"(not {self._emit_expression(node.children[0])})"
         if d == "or_expr":
@@ -408,7 +470,7 @@ class _Emitter:
             return _emit_binop_chain(node.children, self._emit_expression)
         if d == "qname":
             qn = _text_of_qname(node)
-            return _ref_to_python(qn)
+            return _ref_to_python(qn, self._receiver)
         raise TranspileError(f"unsupported expression: {d}")
 
 
@@ -446,12 +508,12 @@ def _is_expression(node) -> bool:
     }
 
 
-def _ref_to_python(qn: str) -> str:
+def _ref_to_python(qn: str, receiver: str) -> str:
     """Resolve a PLUTO qualified reference at runtime via the procedure scope."""
     if " of " not in qn:
         ident = _py_ident(qn)
-        return f'proc.variables.get("{ident}", {ident!r})'
-    return f'proc.variables.get({qn!r}, {qn!r})'
+        return f'{receiver}.variables.get("{ident}", {ident!r})'
+    return f'{receiver}.variables.get({qn!r}, {qn!r})'
 
 
 def _py_ident(name: str) -> str:
