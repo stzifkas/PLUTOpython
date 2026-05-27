@@ -213,16 +213,20 @@ def initiate(*args, instance_name: Optional[str] = None) -> threading.Thread:
     raise TypeError("initiate takes 1 or 2 positional args")
 
 
-def initiate_and_confirm(*args) -> Any:
-    """Initiate and confirm an activity. Accepts either initiate_and_confirm(call) or initiate_and_confirm(proc, call)."""
+def initiate_and_confirm(*args, instance_name: Optional[str] = None) -> Any:
+    """Initiate-and-confirm an activity, awaiting completion.
+
+    Signatures:
+      initiate_and_confirm(call)
+      initiate_and_confirm(proc, call)
+      initiate_and_confirm(proc, call, instance_name="MY_INSTANCE")  # from `refer by`
+    """
     if len(args) == 1:
-        call = args[0]
-        return call()
+        return args[0]()
     if len(args) == 2:
         proc, call = args
-        activity_name = getattr(call, "__pluto_name__", "activity")
+        activity_name = instance_name or getattr(call, "__pluto_name__", "activity")
         act_exec = proc.register_activity(activity_name)
-
         act_exec.start_time = datetime.now()
         act_exec.execution_status = "executing"
         try:
@@ -236,7 +240,7 @@ def initiate_and_confirm(*args) -> Any:
             raise
         finally:
             act_exec.completion_time = datetime.now()
-    raise TypeError("initiate_and_confirm takes 1 or 2 arguments")
+    raise TypeError("initiate_and_confirm takes 1 or 2 positional args")
 
 
 @dataclass

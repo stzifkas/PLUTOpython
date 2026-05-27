@@ -192,10 +192,15 @@ def initiate(proc: "Procedure", call: Callable[[], Awaitable[Any]],
     return asyncio.create_task(wrapper())
 
 
-async def initiate_and_confirm(proc: "Procedure", call: CallableOrCoro) -> Any:
-    activity_name = getattr(call, "__pluto_name__", "activity") if callable(call) else "activity"
+async def initiate_and_confirm(proc: "Procedure", call: CallableOrCoro,
+                               *, instance_name: Optional[str] = None) -> Any:
+    """Initiate-and-confirm with optional `refer by` activity-statement name."""
+    activity_name = (
+        instance_name
+        or (getattr(call, "__pluto_name__", "activity") if callable(call) else "activity")
+    )
     act_exec = proc.register_activity(activity_name)
-    
+
     act_exec.start_time = datetime.now()
     act_exec.execution_status = "executing"
     try:

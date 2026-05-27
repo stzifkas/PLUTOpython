@@ -105,8 +105,11 @@ def _format_statement(stmt: Tree, depth: int) -> List[str]:
                 head += f" refer by {_text_of_name(c.children[0])}"
         return [head]
     if d == "initiate_confirm_stmt":
-        ct = _continuation_test(stmt)
         head = f"{pad}initiate and confirm {_format_activity_call(stmt.children[0])}"
+        for c in stmt.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                head += f" refer by {_text_of_name(c.children[0])}"
+        ct = _continuation_test(stmt)
         if ct is None:
             return [head]
         return [head] + _format_continuation_test(ct, depth + 1)

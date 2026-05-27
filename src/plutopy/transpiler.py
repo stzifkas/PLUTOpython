@@ -285,8 +285,19 @@ class _Emitter:
 
     def _stmt_initiate_confirm_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
+        # Look for refer_by (between activity_call and continuation_test)
+        instance = None
+        for c in node.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                instance = _text_of_name(c.children[0])
         ct = _continuation_test_node(node)
-        invocation = f"{self._await}initiate_and_confirm({self._receiver}, {call})"
+        if instance is not None:
+            invocation = (
+                f"{self._await}initiate_and_confirm("
+                f'{self._receiver}, {call}, instance_name="{instance}")'
+            )
+        else:
+            invocation = f"{self._await}initiate_and_confirm({self._receiver}, {call})"
         if ct is None:
             return [invocation]
         return self._emit_with_continuation(invocation, ct)

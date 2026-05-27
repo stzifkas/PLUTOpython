@@ -96,8 +96,14 @@ def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
                 out["refer_by"] = _name_text(c.children[0])
         return out
     if d == "initiate_confirm_stmt":
+        out: Dict[str, Any] = {
+            "kind": "initiate_and_confirm",
+            "call": _activity_call_to_dict(stmt.children[0]),
+        }
+        for c in stmt.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                out["refer_by"] = _name_text(c.children[0])
         ct = _continuation_test_dict(stmt)
-        out = {"kind": "initiate_and_confirm", "call": _activity_call_to_dict(stmt.children[0])}
         if ct is not None:
             out["continuation_test"] = ct
         return out
