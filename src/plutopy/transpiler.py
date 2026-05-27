@@ -602,11 +602,31 @@ class _Emitter:
     def _emit_activity_call(self, node: Tree) -> str:
         if node.data == "switch_on":
             target = _text_of_qname(node.children[0])
-            return f'switch_on("{target}")'
+            args_kw = self._emit_activity_args(node.children[1:])
+            return f'switch_on("{target}"{args_kw})'
         if node.data == "switch_off":
             target = _text_of_qname(node.children[0])
-            return f'switch_off("{target}")'
+            args_kw = self._emit_activity_args(node.children[1:])
+            return f'switch_off("{target}"{args_kw})'
         raise TranspileError(f"unsupported activity: {node.data}")
+
+    def _emit_activity_args(self, tail_children) -> str:
+        """If the activity call carries an `activity_with` clause, emit the
+        kwarg `, arguments={"NAME": EXPR, ...}` to append to the call.
+
+        Each EXPR is the transpiled Python form of the PLUTO expression.
+        """
+        for c in tail_children:
+            if isinstance(c, Tree) and c.data == "activity_with":
+                items = []
+                for arg in c.children:
+                    name = _text_of_name(arg.children[0])
+                    value = self._emit_expression(arg.children[1])
+                    items.append(f'"{name}": {value}')
+                if not items:
+                    return ""
+                return f', arguments={{{", ".join(items)}}}'
+        return ""
 
     # ---- expressions ----
     def _emit_expression(self, node) -> str:

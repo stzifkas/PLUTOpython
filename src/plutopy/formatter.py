@@ -321,10 +321,26 @@ def _format_repeat(stmt: Tree, depth: int) -> List[str]:
 # ---------- activity calls ----------
 def _format_activity_call(node: Tree) -> str:
     if node.data == "switch_on":
-        return f"Switch on {_text_of_qname(node.children[0])}"
-    if node.data == "switch_off":
-        return f"Switch off {_text_of_qname(node.children[0])}"
-    return f"// unsupported activity: {node.data}"
+        verb = "Switch on"
+    elif node.data == "switch_off":
+        verb = "Switch off"
+    else:
+        return f"// unsupported activity: {node.data}"
+    target = _text_of_qname(node.children[0])
+    args = _format_activity_with(node.children[1:])
+    return f"{verb} {target}{args}"
+
+
+def _format_activity_with(tail) -> str:
+    for c in tail:
+        if isinstance(c, Tree) and c.data == "activity_with":
+            parts = []
+            for arg in c.children:
+                name = _text_of_name(arg.children[0])
+                value = _format_expression(arg.children[1])
+                parts.append(f"{name} := {value}")
+            return " with " + ", ".join(parts) + " end with"
+    return ""
 
 
 # ---------- expressions ----------

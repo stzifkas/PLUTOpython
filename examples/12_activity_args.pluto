@@ -1,0 +1,16 @@
+// Activity arguments via `with X := EXPR ... end with` (PLUTO spec A.3.9.28).
+// The default handler prints whatever arguments are supplied.
+procedure
+    main
+      initiate and confirm Switch on Reaction Wheel3 of AOC of Satellite
+        with Mode := "nominal", TargetRPM := 1500
+        end with
+      level := 1000
+      initiate Switch off Reaction Wheel3
+        with Level := level, AsciiTag := "shutdown"
+        end with
+        refer by SHUTDOWN_TASK
+      wait until execution_status of SHUTDOWN_TASK = "success"
+      inform user "wheel cycled"
+    end main
+end procedure

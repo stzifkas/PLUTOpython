@@ -59,12 +59,16 @@ class SystemElement:
 class Activity:
     name: str
     target: str
-    handler: Callable[["Activity"], Any]
+    handler: Callable[..., Any]
     criticality: str = "routine"
 
-    def invoke(self) -> Any:
+    def invoke(self, **arguments: Any) -> Any:
         log.info("activity: %s on %s", self.name, self.target)
-        return self.handler(self)
+        try:
+            return self.handler(self, **arguments)
+        except TypeError:
+            # Handler that doesn't accept kwargs — fall back to no-arg call.
+            return self.handler(self)
 
 
 @dataclass
@@ -121,37 +125,48 @@ def resolve_activity(name: str, target: str) -> Activity:
     raise PlutoRuntimeError(f"unknown activity: {name!r} on {target!r}")
 
 
-def _default_switch_on(activity: Activity) -> str:
-    msg = f"[ACTIVITY] Switch on {activity.target}"
+def _format_args(arguments: Optional[Dict[str, Any]]) -> str:
+    if not arguments:
+        return ""
+    parts = ", ".join(f"{k}={v!r}" for k, v in arguments.items())
+    return f" with {parts}"
+
+
+def _default_switch_on(activity: Activity, **arguments: Any) -> str:
+    msg = f"[ACTIVITY] Switch on {activity.target}{_format_args(arguments)}"
     print(msg)
     return msg
 
 
-def _default_switch_off(activity: Activity) -> str:
-    msg = f"[ACTIVITY] Switch off {activity.target}"
+def _default_switch_off(activity: Activity, **arguments: Any) -> str:
+    msg = f"[ACTIVITY] Switch off {activity.target}{_format_args(arguments)}"
     print(msg)
     return msg
 
 
-def switch_on(target: str) -> Callable[[], Any]:
+def switch_on(target: str, *, arguments: Optional[Dict[str, Any]] = None) -> Callable[[], Any]:
+    args = arguments or {}
     def _call():
         try:
             act = resolve_activity("Switch on", target)
         except PlutoRuntimeError:
             act = Activity("Switch on", target, _default_switch_on)
-        return act.invoke()
+        return act.invoke(**args)
     _call.__pluto_name__ = f"Switch on {target}"
+    _call.arguments = args
     return _call
 
 
-def switch_off(target: str) -> Callable[[], Any]:
+def switch_off(target: str, *, arguments: Optional[Dict[str, Any]] = None) -> Callable[[], Any]:
+    args = arguments or {}
     def _call():
         try:
             act = resolve_activity("Switch off", target)
         except PlutoRuntimeError:
             act = Activity("Switch off", target, _default_switch_off)
-        return act.invoke()
+        return act.invoke(**args)
     _call.__pluto_name__ = f"Switch off {target}"
+    _call.arguments = args
     return _call
 
 

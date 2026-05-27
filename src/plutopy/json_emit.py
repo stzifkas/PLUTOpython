@@ -247,10 +247,19 @@ def _action_to_dict(action: Tree) -> Dict[str, Any]:
 
 def _activity_call_to_dict(node: Tree) -> Dict[str, Any]:
     if node.data == "switch_on":
-        return {"verb": "switch_on", "target": _qname_text(node.children[0])}
-    if node.data == "switch_off":
-        return {"verb": "switch_off", "target": _qname_text(node.children[0])}
-    return {"verb": "unknown", "rule": node.data}
+        verb = "switch_on"
+    elif node.data == "switch_off":
+        verb = "switch_off"
+    else:
+        return {"verb": "unknown", "rule": node.data}
+    out: Dict[str, Any] = {"verb": verb, "target": _qname_text(node.children[0])}
+    for c in node.children[1:]:
+        if isinstance(c, Tree) and c.data == "activity_with":
+            out["arguments"] = {
+                _name_text(arg.children[0]): _expression_to_str(arg.children[1])
+                for arg in c.children
+            }
+    return out
 
 
 # ----- text / expression helpers (deliberately duplicated from transpiler.py
