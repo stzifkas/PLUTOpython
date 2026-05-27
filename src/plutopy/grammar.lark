@@ -60,7 +60,9 @@ confirmation_section: "confirmation" statement+ "end" "confirmation"
 initiate_stmt: "initiate" activity_call refer_by?
 refer_by: "refer" "by" name
 initiate_confirm_stmt: "initiate" "and" "confirm" activity_call refer_by? continuation_test?
-initiate_confirm_step: "initiate" "and" "confirm" "step" name "main" statement+ "end" "main" "end" "step" continuation_test?
+// Step structure mirrors a procedure (spec A.1.7.1): a step can carry
+// declare, preconditions, watchdog, confirmation sections alongside main.
+initiate_confirm_step: "initiate" "and" "confirm" "step" name section+ "end" "step" continuation_test?
 
 // ---- continuation test (spec A.3.9.33) ----
 continuation_test: "in" "case" continuation_arm+ "end" "case"

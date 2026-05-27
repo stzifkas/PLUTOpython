@@ -303,18 +303,61 @@ class _Emitter:
         return self._emit_with_continuation(invocation, ct)
 
     def _stmt_initiate_confirm_step(self, node: Tree) -> List[str]:
+        """Emit a step with full A.1.7-style structure.
+
+        A step now mirrors a procedure: its body is a sequence of named
+        sections (declare / preconditions / main / watchdog / confirmation),
+        each emitted in the canonical order inside the step's body function.
+        """
         step_name = _text_of_name(node.children[0])
-        # children: name, statement..., continuation_test?
         ct = _continuation_test_node(node)
-        body_stmts = [c for c in node.children[1:] if not _is_continuation_test(c)]
+        sections = [
+            c for c in node.children[1:]
+            if isinstance(c, Tree) and c.data.endswith("_section")
+        ]
+        section_map: dict[str, Tree] = {s.data: s for s in sections}
+
         self._step_counter += 1
         fn_name = f"_step_{self._step_counter}"
         lines = [f"{self._def} {fn_name}():"]
-        if not body_stmts:
-            lines.append(f"{INDENT}pass")
-        else:
-            for s in body_stmts:
-                lines.extend(_indent_block(self._emit_statement(s), 1))
+
+        body: List[str] = []
+        if "declare_section" in section_map:
+            body.append("# step declarations")
+            for decl in section_map["declare_section"].children:
+                body.append(self._emit_event_decl(decl))
+        if "watchdog_section" in section_map:
+            body.append("# step watchdog handlers")
+            for handler in section_map["watchdog_section"].children:
+                ev_name = _text_of_name(handler.children[0])
+                self._step_counter += 1
+                wd_fn = f"_step_watchdog_{self._step_counter}"
+                body.append(f"{self._def} {wd_fn}():")
+                hbody = handler.children[1:]
+                if not hbody:
+                    body.append(f"{INDENT}pass")
+                else:
+                    for s in hbody:
+                        body.extend(_indent_block(self._emit_statement(s), 1))
+                body.append(f'{self._receiver}.register_watchdog("{ev_name}", {wd_fn})')
+        if "preconditions_section" in section_map:
+            body.append("# step preconditions")
+            for pre in section_map["preconditions_section"].children:
+                body.extend(self._emit_statement(pre))
+        if "main_section" in section_map:
+            if any(k in section_map for k in ("declare_section", "preconditions_section", "watchdog_section")):
+                body.append("# step main")
+            for stmt in section_map["main_section"].children:
+                body.extend(self._emit_statement(stmt))
+        if "confirmation_section" in section_map:
+            body.append("# step confirmation")
+            for stmt in section_map["confirmation_section"].children:
+                body.extend(self._emit_statement(stmt))
+
+        if not body:
+            body = ["pass"]
+        lines.extend(_indent_block(body, 1))
+
         invocation = (
             f'{self._await}initiate_and_confirm_step('
             f'{self._receiver}, "{step_name}", {fn_name})'

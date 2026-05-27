@@ -108,12 +108,26 @@ def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
             out["continuation_test"] = ct
         return out
     if d == "initiate_confirm_step":
-        body = [c for c in stmt.children[1:] if not (isinstance(c, Tree) and c.data == "continuation_test")]
-        out = {
-            "kind": "step",
-            "name": _name_text(stmt.children[0]),
-            "body": [_stmt_to_dict(s) for s in body],
-        }
+        out: Dict[str, Any] = {"kind": "step", "name": _name_text(stmt.children[0])}
+        sections = [
+            c for c in stmt.children[1:]
+            if isinstance(c, Tree) and c.data.endswith("_section")
+        ]
+        for section in sections:
+            tag = section.data
+            if tag == "declare_section":
+                out["declare"] = [_event_decl_to_dict(d_) for d_ in section.children]
+            elif tag == "preconditions_section":
+                out["preconditions"] = [_stmt_to_dict(s) for s in section.children]
+            elif tag == "main_section":
+                out["body"] = [_stmt_to_dict(s) for s in section.children]
+            elif tag == "watchdog_section":
+                out["watchdog"] = {
+                    _name_text(h.children[0]): [_stmt_to_dict(s) for s in h.children[1:]]
+                    for h in section.children
+                }
+            elif tag == "confirmation_section":
+                out["confirmation"] = [_stmt_to_dict(s) for s in section.children]
         ct = _continuation_test_dict(stmt)
         if ct is not None:
             out["continuation_test"] = ct

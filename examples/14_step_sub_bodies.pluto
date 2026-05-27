@@ -1,0 +1,28 @@
+// Step structure mirrors a procedure (PLUTO spec A.1.7.1): a step may
+// carry declare / preconditions / watchdog / confirmation sections
+// alongside main. This example exercises all of them.
+procedure
+    declare
+      event aborted_event described by Procedure level abort signal
+    end declare
+    main
+      counter := 1
+      initiate and confirm step BRING_UP_TRACKER
+        declare
+          event tracker_ready
+        end declare
+        preconditions
+          wait until counter >= 1
+        end preconditions
+        main
+          initiate and confirm Switch on Star Tracker1
+          raise event tracker_ready
+        end main
+        confirmation
+          wait until execution_status of BRING_UP_TRACKER = "executing"
+          log "tracker step is confirming"
+        end confirmation
+      end step
+      inform user "tracker step completed"
+    end main
+end procedure

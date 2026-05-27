@@ -160,17 +160,15 @@ def _format_statement(stmt: Tree, depth: int) -> List[str]:
 
 def _format_step(stmt: Tree, depth: int) -> List[str]:
     pad = INDENT * depth
-    inner = INDENT * (depth + 1)
     name = _text_of_name(stmt.children[0])
     ct = _continuation_test(stmt)
-    body = [c for c in stmt.children[1:] if not (isinstance(c, Tree) and c.data == "continuation_test")]
-    lines = [
-        f"{pad}initiate and confirm step {name}",
-        f"{inner}main",
+    sections = [
+        c for c in stmt.children[1:]
+        if isinstance(c, Tree) and c.data.endswith("_section")
     ]
-    for s in body:
-        lines.extend(_format_statement(s, depth + 2))
-    lines.append(f"{inner}end main")
+    lines = [f"{pad}initiate and confirm step {name}"]
+    for section in sections:
+        lines.extend(_format_section(section, depth + 1))
     lines.append(f"{pad}end step")
     if ct is not None:
         lines.extend(_format_continuation_test(ct, depth + 1))
