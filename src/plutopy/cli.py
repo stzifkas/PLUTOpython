@@ -37,6 +37,11 @@ def main(argv: list[str] | None = None) -> int:
     p_demo = sub.add_parser("demo", help="live TUI dashboard (requires rich)")
     p_demo.add_argument("script", type=pathlib.Path, nargs="?", help="optional .pluto script; defaults to examples/05_full_bringup.pluto")
 
+    p_fmt = sub.add_parser("fmt", help="canonicalise PLUTO source (pretty-print)")
+    p_fmt.add_argument("script", type=pathlib.Path)
+    p_fmt.add_argument("-i", "--in-place", action="store_true", help="rewrite the file in place")
+    p_fmt.add_argument("--check", action="store_true", help="exit non-zero if the file isn't already canonical")
+
     args = ap.parse_args(argv)
 
     if args.verbose:
@@ -67,6 +72,22 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "demo":
         from plutopy.demo import run_demo
         return run_demo(args.script)
+
+    if args.cmd == "fmt":
+        from plutopy.formatter import format_source
+        original = args.script.read_text()
+        try:
+            formatted = format_source(original, filename=str(args.script))
+        except PlutoParseError as e:
+            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            return 1
+        if args.check:
+            return 0 if original == formatted else 1
+        if args.in_place:
+            args.script.write_text(formatted)
+            return 0
+        sys.stdout.write(formatted)
+        return 0
 
     if args.cmd == "run":
         try:
