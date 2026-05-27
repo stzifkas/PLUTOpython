@@ -1,0 +1,22 @@
+// "Set context" (PLUTO spec A.3.9.10).
+//
+// In the context of Telescope1 do … end context implicitly qualifies
+// activity targets inside the block with the named context. So
+//
+//   in the context of Telescope1 do
+//     initiate and confirm Switch on Power Unit;
+//   end context
+//
+// resolves to `Switch on Power Unit of Telescope1`. Contexts nest.
+procedure
+    main
+      in the context of Telescope1 of Payload do
+        initiate and confirm Switch on Power Unit
+        initiate and confirm Switch off Power Unit
+      end context
+      in the context of Telescope2 of Payload do
+        initiate and confirm Switch on Power Unit
+      end context
+      inform user "both telescopes cycled"
+    end main
+end procedure

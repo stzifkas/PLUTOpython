@@ -224,12 +224,15 @@ That generated file is self-contained Python. Drop it into any project that depe
 | --- | --- |
 | Sections | `procedure / declare / preconditions / main / watchdog / confirmation / end procedure` |
 | Events | `event NAME described by DESCRIPTION`, `raise event NAME`, `wait for event NAME` |
-| Activities | `initiate <call>`, `initiate and confirm <call>`, `initiate and confirm step NAME main … end main end step`, `Switch on/off TARGET (of TARGET)*` |
+| Activities | `initiate <call> [refer by INSTANCE]`, `initiate and confirm <call>`, `initiate and confirm step NAME main … end main end step`, `Switch on/off TARGET (of TARGET)*`, activity arguments `with NAME := EXPR, … end with` (A.3.9.27, A.3.9.28) |
+| Continuation tests | `in case confirmed: continue; not confirmed: restart [max N times \| with timeout T]; aborted: abort; raise event E; ask user; terminate; end case` — defaults per A.2.5 (A.3.9.33) |
+| Activity properties | `<property> of <step or named-instance>` in expressions — `execution_status`, `start_time`, `completion_time`, `confirmation_status` (A.3.9.8) |
+| Context | `in the context of X (of Y…) do … end context` — qualifies activity targets, nesting supported (A.3.9.10) |
 | Control flow | `if … then … else … end if`, `case E of when V do … otherwise … end case`, `while … do … [with timeout E] end while`, `for X := A to B [by C] do … end for`, `repeat … until E [with timeout E] end repeat`, `wait for event E [with timeout T]`, `wait until E [with timeout T]` |
 | Watchdog | `watchdog on EVENT do … end on end watchdog` — handlers fire synchronously when the event is raised |
 | Concurrency | `in parallel until all complete … end parallel`, `in parallel until one completes … end parallel` |
 | Assignment | `var := expr` |
-| Expressions | numbers, strings, qualified names, `+ - * /`, `> < >= <= = <>`, `and / or / not` |
+| Expressions | numbers, strings, qualified names, property requests, `+ - * /`, `> < >= <= = <>`, `and / or / not` |
 | Output | `log expr`, `inform user expr` |
 
 ## Architecture
@@ -316,8 +319,11 @@ PLUTOpython/
 
 To stay shippable for the Finish-Up-A-Thon deadline:
 
-- **Continuation tests** on `initiate and confirm` — recognised in spec, not parsed.
-- **`set the X of Y to Z`** generic object operations — only `Switch on/off` is supported as an activity call. Adding more verbs is a one-line grammar change per verb plus a runtime helper.
+- **Generic object operations** (`set the X of Y to Z` and arbitrary verbs beyond `Switch on/off`) — adding more verbs is a one-line grammar change per verb plus a runtime helper.
+- **`save context` statement** (A.3.9.25) and explicit `save context` / restore semantics — not implemented.
+- **Reporting data / parameter declarations** with engineering units, validity status, monitoring (A.3.9.14, A.3 p–s) — not implemented; variables are untyped Python.
+- **Step sub-bodies** — a step can in principle carry its own `declare / preconditions / watchdog / confirmation` sections (A.1.7); only `main` is supported on inner step definitions.
+- **Activity argument variants** — only named-simple arguments. The spec also defines `with value set`, `with directives`, record arguments and array arguments (A.3.9.28).
 - **Full ECSS Space System Model** — the 2019 prototype carried a sprawling SSM class hierarchy; the current runtime trims it to `SystemElement`, `Activity`, `Event`. The full model can be re-introduced incrementally on top of the runtime registry.
 
 ## Credits

@@ -136,6 +136,10 @@ class _Emitter:
         self._is_class = style == "class"
         # `proc` for function style, `self` when the body is a method.
         self._receiver = "self" if self._is_class else "proc"
+        # Stack of `in the context of X do … end context` qnames. The
+        # innermost context is the last element; activity targets emitted
+        # while the stack is non-empty get the chain appended.
+        self._context_stack: List[str] = []
 
     # async helpers
     @property
@@ -455,13 +459,32 @@ class _Emitter:
         return lines
 
     def _stmt_context_stmt(self, node: Tree) -> List[str]:
+        """Emit a context block (PLUTO spec A.3.9.10).
+
+        Activity calls inside the block have the context appended to
+        their target qualifier: `Switch on Y` inside
+        `in the context of X do … end context` is emitted as
+        `switch_on("Y of X")`. Contexts nest; the innermost is the most
+        immediate qualifier.
+        """
         target = _text_of_qname(node.children[0])
         body = node.children[1:]
-        # Lightweight: emit comment + body
-        lines = [f"# context: {target}"]
-        for s in body:
-            lines.extend(self._emit_statement(s))
+        lines = [f"# in the context of {target}"]
+        self._context_stack.append(target)
+        try:
+            for s in body:
+                lines.extend(self._emit_statement(s))
+        finally:
+            self._context_stack.pop()
+        lines.append("# end context")
         return lines
+
+    def _apply_context(self, target: str) -> str:
+        """Append the active context chain to an activity target."""
+        if not self._context_stack:
+            return target
+        chain = " of ".join(reversed(self._context_stack))
+        return f"{target} of {chain}"
 
     def _stmt_if_stmt(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
@@ -601,11 +624,11 @@ class _Emitter:
     # ---- activity calls ----
     def _emit_activity_call(self, node: Tree) -> str:
         if node.data == "switch_on":
-            target = _text_of_qname(node.children[0])
+            target = self._apply_context(_text_of_qname(node.children[0]))
             args_kw = self._emit_activity_args(node.children[1:])
             return f'switch_on("{target}"{args_kw})'
         if node.data == "switch_off":
-            target = _text_of_qname(node.children[0])
+            target = self._apply_context(_text_of_qname(node.children[0]))
             args_kw = self._emit_activity_args(node.children[1:])
             return f'switch_off("{target}"{args_kw})'
         raise TranspileError(f"unsupported activity: {node.data}")
