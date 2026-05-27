@@ -34,6 +34,9 @@ Tag [`v0.1-gsoc-2019`](https://github.com/stzifkas/PLUTOpython/releases/tag/v0.1
 | CI | GitHub Actions matrix on Python 3.9 / 3.11 / 3.13 |
 | Highlighter | Pygments lexer for `.pluto` files; powers this docs site |
 | Docs | This mkdocs site, deployed from `docs/` via CI |
+| Formatter | `plutopy fmt` — idempotent canonical pretty-printer; `--check` mode for CI gating |
+| Generator | `plutopy gen spec.yaml` — declarative YAML → PLUTO scaffold for templating procedures |
+| Playground | Browser-based PLUTO compiler and runner, no install required, served from `/playground/` on the docs site |
 
 ## AI-assisted revival
 

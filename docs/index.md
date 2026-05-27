@@ -45,6 +45,7 @@ $ plutopy run script.pluto
 
 ## Continue reading
 
+- [Playground](playground/index.html) — write PLUTO and run it in your browser, no install
 - [Quickstart](quickstart.md) — install, run, write your first PLUTO procedure
 - [Grammar reference](grammar.md) — every supported PLUTO construct
 - [Examples](examples.md) — five demos exercising the language
