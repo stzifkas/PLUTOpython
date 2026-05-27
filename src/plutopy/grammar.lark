@@ -99,6 +99,10 @@ name: WORD (WORD)*
 qname: name ("of" name)*
 description: WORD (WORD)*
 
+// ---- property request ----
+property_request: property_name "of" qname
+property_name: WORD ("_" WORD)*
+
 // ---- expressions ----
 ?expression: or_expr
 ?or_expr: and_expr ("or" and_expr)*
@@ -110,7 +114,8 @@ CMP_OP: ">=" | "<=" | "<>" | ">" | "<" | "="
 ADD_OP: "+" | "-"
 ?term: factor (MUL_OP factor)*
 MUL_OP: "*" | "/"
-?factor: NUMBER         -> num_lit
-       | ESCAPED_STRING -> str_lit
-       | qname          -> var_ref
+?factor: NUMBER              -> num_lit
+       | ESCAPED_STRING      -> str_lit
+       | property_request    -> prop_req
+       | qname               -> var_ref
        | "(" expression ")"

@@ -30,7 +30,7 @@ def test_async_emits_async_def_main():
     assert "await initiate_and_confirm" in out
     assert "await parallel_until_all" in out
     # fire-and-forget initiate is NOT awaited (it's a task scheduler)
-    assert "initiate(switch_on" in out
+    assert "initiate(proc, switch_on" in out
 
 
 def test_async_emits_async_steps_and_branches():

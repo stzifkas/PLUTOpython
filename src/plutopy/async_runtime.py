@@ -15,6 +15,7 @@ import asyncio
 import inspect
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 log = logging.getLogger("plutopy")
@@ -61,6 +62,28 @@ class Activity:
         if inspect.iscoroutinefunction(self.handler):
             return await self.handler(self)
         return await asyncio.to_thread(self.handler, self)
+
+
+@dataclass
+class ActivityExecution:
+    """Tracks execution state of an activity instance."""
+    name: str
+    execution_status: str = "pending"  # pending, executing, success, failure
+    start_time: Optional[datetime] = None
+    completion_time: Optional[datetime] = None
+    confirmation_status: Optional[Any] = None
+
+    def get_property(self, property_name: str) -> Any:
+        """Get a property of this activity execution."""
+        props = {
+            "execution_status": self.execution_status,
+            "start_time": self.start_time,
+            "completion_time": self.completion_time,
+            "confirmation_status": self.confirmation_status,
+        }
+        if property_name not in props:
+            raise PlutoRuntimeError(f"unknown property: {property_name!r}")
+        return props[property_name]
 
 
 _activities: Dict[tuple, Activity] = {}
@@ -115,18 +138,51 @@ def switch_off(target: str) -> Callable[[], Awaitable[Any]]:
     return _call
 
 
-def initiate(call: Callable[[], Awaitable[Any]]) -> asyncio.Task:
+def initiate(proc: "Procedure", call: Callable[[], Awaitable[Any]]) -> asyncio.Task:
     """Fire and forget: schedule the call but do not await it here."""
-    coro = call() if inspect.iscoroutinefunction(call) else asyncio.to_thread(call)
-    return asyncio.create_task(coro)
+    activity_name = getattr(call, "__pluto_name__", "activity")
+    act_exec = proc.register_activity(activity_name)
+    
+    async def wrapper():
+        act_exec.start_time = datetime.now()
+        act_exec.execution_status = "executing"
+        try:
+            coro = call() if inspect.iscoroutinefunction(call) else asyncio.to_thread(call)
+            result = await coro
+            act_exec.confirmation_status = result
+            act_exec.execution_status = "success"
+        except Exception as e:
+            act_exec.execution_status = "failure"
+            act_exec.confirmation_status = str(e)
+            raise
+        finally:
+            act_exec.completion_time = datetime.now()
+    
+    return asyncio.create_task(wrapper())
 
 
-async def initiate_and_confirm(call: CallableOrCoro) -> Any:
-    if inspect.iscoroutinefunction(call):
-        return await call()
-    if inspect.iscoroutine(call):
-        return await call
-    return await asyncio.to_thread(call)
+async def initiate_and_confirm(proc: "Procedure", call: CallableOrCoro) -> Any:
+    activity_name = getattr(call, "__pluto_name__", "activity") if callable(call) else "activity"
+    act_exec = proc.register_activity(activity_name)
+    
+    act_exec.start_time = datetime.now()
+    act_exec.execution_status = "executing"
+    try:
+        if inspect.iscoroutinefunction(call):
+            result = await call()
+        elif inspect.iscoroutine(call):
+            result = await call
+        else:
+            result = await asyncio.to_thread(call)
+        act_exec.confirmation_status = result
+        act_exec.execution_status = "success"
+        return result
+    except Exception as e:
+        act_exec.execution_status = "failure"
+        act_exec.confirmation_status = str(e)
+        raise
+    finally:
+        act_exec.completion_time = datetime.now()
 
 
 @dataclass
@@ -216,6 +272,7 @@ class Procedure:
     events: Dict[str, Event] = field(default_factory=dict)
     variables: Dict[str, Any] = field(default_factory=dict)
     watchdog_handlers: Dict[str, Callable[[], Awaitable[None]]] = field(default_factory=dict)
+    _activities: Dict[str, ActivityExecution] = field(default_factory=dict)
 
     def declare_event(self, event: Event) -> Event:
         self.events[event.name] = event
@@ -235,6 +292,16 @@ class Procedure:
                 await handler()
             else:
                 handler()
+
+    def register_activity(self, activity_name: str) -> ActivityExecution:
+        act = ActivityExecution(activity_name)
+        self._activities[activity_name] = act
+        return act
+
+    def get_property(self, activity_name: str, property_name: str) -> Any:
+        if activity_name not in self._activities:
+            raise PlutoRuntimeError(f"activity not tracked: {activity_name!r}")
+        return self._activities[activity_name].get_property(property_name)
 
     def start(self) -> None:
         self.execution_status = "executing"

@@ -10,6 +10,7 @@ import logging
 import threading
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
 log = logging.getLogger("plutopy")
@@ -52,6 +53,28 @@ class Activity:
     def invoke(self) -> Any:
         log.info("activity: %s on %s", self.name, self.target)
         return self.handler(self)
+
+
+@dataclass
+class ActivityExecution:
+    """Tracks execution state of an activity instance."""
+    name: str
+    execution_status: str = "pending"  # pending, executing, success, failure
+    start_time: Optional[datetime] = None
+    completion_time: Optional[datetime] = None
+    confirmation_status: Optional[Any] = None
+
+    def get_property(self, property_name: str) -> Any:
+        """Get a property of this activity execution."""
+        props = {
+            "execution_status": self.execution_status,
+            "start_time": self.start_time,
+            "completion_time": self.completion_time,
+            "confirmation_status": self.confirmation_status,
+        }
+        if property_name not in props:
+            raise PlutoRuntimeError(f"unknown property: {property_name!r}")
+        return props[property_name]
 
 
 _systems: Dict[str, SystemElement] = {}
@@ -120,14 +143,62 @@ def switch_off(target: str) -> Callable[[], Any]:
     return _call
 
 
-def initiate(call: Callable[[], Any]) -> threading.Thread:
-    t = threading.Thread(target=call, name=getattr(call, "__pluto_name__", "activity"))
-    t.start()
-    return t
+def initiate(*args) -> threading.Thread:
+    """Initiate an activity. Accepts either initiate(call) or initiate(proc, call)."""
+    if len(args) == 1:
+        call = args[0]
+        t = threading.Thread(target=call, name=getattr(call, "__pluto_name__", "activity"))
+        t.start()
+        return t
+    if len(args) == 2:
+        proc, call = args
+        activity_name = getattr(call, "__pluto_name__", "activity")
+        act_exec = proc.register_activity(activity_name)
+
+        def wrapper():
+            act_exec.start_time = datetime.now()
+            act_exec.execution_status = "executing"
+            try:
+                result = call()
+                act_exec.confirmation_status = result
+                act_exec.execution_status = "success"
+            except Exception as e:
+                act_exec.execution_status = "failure"
+                act_exec.confirmation_status = str(e)
+                raise
+            finally:
+                act_exec.completion_time = datetime.now()
+
+        t = threading.Thread(target=wrapper, name=activity_name)
+        t.start()
+        return t
+    raise TypeError("initiate takes 1 or 2 arguments")
 
 
-def initiate_and_confirm(call: Callable[[], Any]) -> Any:
-    return call()
+def initiate_and_confirm(*args) -> Any:
+    """Initiate and confirm an activity. Accepts either initiate_and_confirm(call) or initiate_and_confirm(proc, call)."""
+    if len(args) == 1:
+        call = args[0]
+        return call()
+    if len(args) == 2:
+        proc, call = args
+        activity_name = getattr(call, "__pluto_name__", "activity")
+        act_exec = proc.register_activity(activity_name)
+
+        act_exec.start_time = datetime.now()
+        act_exec.execution_status = "executing"
+        try:
+            result = call()
+            act_exec.confirmation_status = result
+            act_exec.execution_status = "success"
+            return result
+        except Exception as e:
+            act_exec.execution_status = "failure"
+            act_exec.confirmation_status = str(e)
+            raise
+        finally:
+            act_exec.completion_time = datetime.now()
+    raise TypeError("initiate_and_confirm takes 1 or 2 arguments")
 
 
 @dataclass
@@ -220,6 +291,7 @@ class Procedure:
     events: Dict[str, Event] = field(default_factory=dict)
     variables: Dict[str, Any] = field(default_factory=dict)
     watchdog_handlers: Dict[str, Callable[[], None]] = field(default_factory=dict)
+    _activities: Dict[str, ActivityExecution] = field(default_factory=dict)
 
     def declare_event(self, event: Event) -> Event:
         self.events[event.name] = event
@@ -236,6 +308,18 @@ class Procedure:
         if handler is not None:
             log.info("watchdog: handling %s", name)
             handler()
+
+    def register_activity(self, activity_name: str) -> ActivityExecution:
+        """Register and track an activity execution."""
+        act = ActivityExecution(activity_name)
+        self._activities[activity_name] = act
+        return act
+
+    def get_property(self, activity_name: str, property_name: str) -> Any:
+        """Get a property of a tracked activity."""
+        if activity_name not in self._activities:
+            raise PlutoRuntimeError(f"activity not tracked: {activity_name!r}")
+        return self._activities[activity_name].get_property(property_name)
 
     def start(self) -> None:
         self.execution_status = "executing"

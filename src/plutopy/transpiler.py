@@ -5,11 +5,14 @@ defines a `main()` function. The transpiled module is human-readable.
 """
 from __future__ import annotations
 
+import pathlib
 from typing import List
 
 from lark import Token, Tree
 
 from plutopy.parser import parse as parse_pluto
+
+_RUNTIME_DIR = pathlib.Path(__file__).parent
 
 
 INDENT = "    "
@@ -30,6 +33,7 @@ def transpile(
     filename: str | None = None,
     runtime: str = "threaded",
     style: str = "functions",
+    no_runtime: bool = False,
 ) -> str:
     """Transpile a PLUTO source string into runnable Python source.
 
@@ -41,6 +45,12 @@ def transpile(
       - "functions" (default): emits `def main():` (or `async def main():`).
       - "class": emits a `TranspiledProcedure(Procedure)` subclass with
         declarations in `__init__` and main body in `run()`.
+
+    `no_runtime`:
+      - False (default): the output `import`s from `plutopy.runtime` (or
+        `plutopy.async_runtime`).
+      - True: inlines the runtime source so the output is a single
+        self-contained .py file with no `plutopy` dependency.
     """
     if runtime not in VALID_RUNTIMES:
         raise TranspileError(f"unknown runtime: {runtime!r}; expected one of {VALID_RUNTIMES}")
@@ -49,23 +59,37 @@ def transpile(
     tree = parse_pluto(source, filename=filename)
     emitter = _Emitter(runtime=runtime, style=style)
     body = emitter.emit_procedure(tree.children[0])
-    header = _module_header(module_doc, runtime=runtime)
+    header = _module_header(module_doc, runtime=runtime, no_runtime=no_runtime)
     return header + body + _module_footer(runtime=runtime, style=style)
 
 
-def _module_header(doc: str | None, *, runtime: str) -> str:
+_RUNTIME_PUBLIC_NAMES = (
+    "Procedure", "Event",
+    "switch_on", "switch_off",
+    "initiate", "initiate_and_confirm", "initiate_and_confirm_step",
+    "parallel_until_all", "parallel_until_one",
+    "wait_for_event", "wait_until",
+    "inform_user", "pluto_log",
+)
+
+
+def _module_header(doc: str | None, *, runtime: str, no_runtime: bool = False) -> str:
     doc_str = f'"""{doc}"""\n' if doc else '"""Transpiled from a PLUTO procedure."""\n'
+    if no_runtime:
+        runtime_file = "async_runtime.py" if runtime == "async" else "runtime.py"
+        runtime_src = (_RUNTIME_DIR / runtime_file).read_text()
+        return (
+            doc_str
+            + "# --- inlined plutopy runtime (--no-runtime) ---\n"
+            + "# This file is self-contained. Edit at your own risk.\n"
+            + runtime_src.rstrip()
+            + "\n# --- end inlined runtime ---\n\n\n"
+        )
     module = "plutopy.async_runtime" if runtime == "async" else "plutopy.runtime"
+    import_list = ",\n    ".join(_RUNTIME_PUBLIC_NAMES)
     return (
         doc_str
-        + f"from {module} import (\n"
-        + "    Procedure, Event,\n"
-        + "    switch_on, switch_off,\n"
-        + "    initiate, initiate_and_confirm, initiate_and_confirm_step,\n"
-        + "    parallel_until_all, parallel_until_one,\n"
-        + "    wait_for_event, wait_until,\n"
-        + "    inform_user, pluto_log,\n"
-        + ")\n\n\n"
+        + f"from {module} import (\n    {import_list},\n)\n\n\n"
     )
 
 
@@ -246,11 +270,11 @@ class _Emitter:
 
     def _stmt_initiate_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
-        return [f"initiate({call})"]
+        return [f"initiate({self._receiver}, {call})"]
 
     def _stmt_initiate_confirm_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
-        return [f"{self._await}initiate_and_confirm({call})"]
+        return [f"{self._await}initiate_and_confirm({self._receiver}, {call})"]
 
     def _stmt_initiate_confirm_step(self, node: Tree) -> List[str]:
         step_name = _text_of_name(node.children[0])
@@ -449,6 +473,8 @@ class _Emitter:
             return str(node.children[0])
         if d == "str_lit":
             return str(node.children[0])
+        if d == "prop_req":
+            return self._emit_property_request(node.children[0])
         if d == "var_ref":
             qn = _text_of_qname(node.children[0])
             return _ref_to_python(qn, self._receiver)
@@ -472,6 +498,26 @@ class _Emitter:
             qn = _text_of_qname(node)
             return _ref_to_python(qn, self._receiver)
         raise TranspileError(f"unsupported expression: {d}")
+
+    def _emit_property_request(self, node) -> str:
+        """Emit code to get an activity property.
+        
+        Translates: execution_status of Star Tracker1
+        To: proc.get_property("Star Tracker1", "execution_status")
+        """
+        # node.children[0] is property_request tree
+        # tree has: property_name, "of", qname
+        prop_req = node
+        prop_name_node = prop_req.children[0]
+        qname_node = prop_req.children[1]
+        
+        # Extract property name (e.g., "execution_status")
+        prop_name = _text_of_qname(prop_name_node)
+        
+        # Extract activity name (e.g., "Star Tracker1")
+        activity_name = _text_of_qname(qname_node)
+        
+        return f'{self._receiver}.get_property("{activity_name}", "{prop_name}")'
 
 
 def _emit_binop_chain(children, emit) -> str:
@@ -504,7 +550,7 @@ def _is_expression(node) -> bool:
         return False
     return node.data in {
         "or_expr", "and_expr", "not_op", "comparison",
-        "arith", "term", "num_lit", "str_lit", "var_ref", "qname",
+        "arith", "term", "num_lit", "str_lit", "var_ref", "qname", "prop_req",
     }
 
 

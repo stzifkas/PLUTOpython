@@ -35,6 +35,8 @@ def main(argv: list[str] | None = None) -> int:
                            help="emit a free main() function or a Procedure subclass (default: functions)")
     p_compile.add_argument("--emit", choices=("python", "json"), default="python",
                            help="output format (default: python)")
+    p_compile.add_argument("--no-runtime", action="store_true",
+                           help="inline the runtime so the output is self-contained (Python only)")
 
     p_run = sub.add_parser("run", help="transpile and execute")
     p_run.add_argument("script", type=pathlib.Path)
@@ -84,6 +86,7 @@ def main(argv: list[str] | None = None) -> int:
                     module_doc=f"Transpiled from {args.script.name}",
                     runtime=args.runtime,
                     style=args.style,
+                    no_runtime=args.no_runtime,
                 )
         except PlutoParseError as e:
             print(f"plutopy: parse error\n{e}", file=sys.stderr)
