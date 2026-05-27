@@ -29,10 +29,14 @@ def main(argv: list[str] | None = None) -> int:
     p_compile = sub.add_parser("compile", help="transpile to Python")
     p_compile.add_argument("script", type=pathlib.Path)
     p_compile.add_argument("-o", "--output", type=pathlib.Path, help="output .py path (default: stdout)")
+    p_compile.add_argument("--runtime", choices=("threaded", "async"), default="threaded",
+                           help="target runtime (default: threaded)")
 
     p_run = sub.add_parser("run", help="transpile and execute")
     p_run.add_argument("script", type=pathlib.Path)
     p_run.add_argument("--keep", action="store_true", help="keep transpiled .py file and print its path")
+    p_run.add_argument("--runtime", choices=("threaded", "async"), default="threaded",
+                       help="target runtime (default: threaded)")
 
     p_demo = sub.add_parser("demo", help="live TUI dashboard (requires rich)")
     p_demo.add_argument("script", type=pathlib.Path, nargs="?", help="optional .pluto script; defaults to examples/05_full_bringup.pluto")
@@ -63,7 +67,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "compile":
         try:
-            py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+            py = transpile(
+                args.script.read_text(),
+                module_doc=f"Transpiled from {args.script.name}",
+                runtime=args.runtime,
+            )
         except PlutoParseError as e:
             print(f"plutopy: parse error\n{e}", file=sys.stderr)
             return 1
@@ -108,7 +116,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "run":
         try:
-            py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+            py = transpile(
+                args.script.read_text(),
+                module_doc=f"Transpiled from {args.script.name}",
+                runtime=args.runtime,
+            )
         except PlutoParseError as e:
             print(f"plutopy: parse error\n{e}", file=sys.stderr)
             return 1

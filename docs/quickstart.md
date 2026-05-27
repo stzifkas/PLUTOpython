@@ -30,13 +30,21 @@ running procedure  ── calls into ──>  plutopy.runtime
 ## Commands
 
 ```bash
-plutopy parse   examples/03_loops.pluto      # show the parse tree
-plutopy compile examples/01_original.pluto   # emit Python to stdout
-plutopy compile  examples/01_original.pluto -o /tmp/demo.py
-plutopy run     examples/01_original.pluto   # transpile and execute
-plutopy -v run  examples/04_events.pluto     # with runtime lifecycle logs
-plutopy demo    examples/05_full_bringup.pluto    # live TUI dashboard
+plutopy parse   examples/03_loops.pluto              # show the parse tree
+plutopy compile examples/01_original.pluto           # emit Python (threaded runtime)
+plutopy compile --runtime async examples/01_original.pluto   # emit async/await Python
+plutopy compile examples/01_original.pluto -o /tmp/demo.py
+plutopy run     examples/01_original.pluto           # transpile and execute
+plutopy run --runtime async examples/04_events.pluto # run against asyncio runtime
+plutopy -v run  examples/04_events.pluto             # with runtime lifecycle logs
+plutopy demo    examples/05_full_bringup.pluto       # live TUI dashboard
+plutopy fmt     examples/01_original.pluto           # canonicalise the source
+plutopy gen     examples/specs/bringup.yaml          # scaffold from a YAML spec
 ```
+
+## Runtime targets
+
+By default `compile` and `run` target the **threaded** runtime (`plutopy.runtime`). Pass `--runtime async` to emit `async def main()` calling `plutopy.async_runtime`, which uses `asyncio.gather` for parallel sections and `asyncio.Event` for `wait for event`. Useful when integrating into an existing event loop — threads inside `asyncio` are a footgun.
 
 ## Your first PLUTO procedure
 

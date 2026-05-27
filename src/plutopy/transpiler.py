@@ -19,20 +19,39 @@ class TranspileError(Exception):
     pass
 
 
-def transpile(source: str, *, module_doc: str | None = None, filename: str | None = None) -> str:
-    """Transpile a PLUTO source string into runnable Python source."""
+VALID_RUNTIMES = ("threaded", "async")
+
+
+def transpile(
+    source: str,
+    *,
+    module_doc: str | None = None,
+    filename: str | None = None,
+    runtime: str = "threaded",
+) -> str:
+    """Transpile a PLUTO source string into runnable Python source.
+
+    `runtime`:
+      - "threaded" (default): emits `def main()` against `plutopy.runtime`,
+        using threads for parallel sections.
+      - "async": emits `async def main()` against `plutopy.async_runtime`,
+        using `asyncio.gather` and awaitables.
+    """
+    if runtime not in VALID_RUNTIMES:
+        raise TranspileError(f"unknown runtime: {runtime!r}; expected one of {VALID_RUNTIMES}")
     tree = parse_pluto(source, filename=filename)
-    emitter = _Emitter()
+    emitter = _Emitter(runtime=runtime)
     body = emitter.emit_procedure(tree.children[0])
-    header = _module_header(module_doc)
-    return header + body + _module_footer()
+    header = _module_header(module_doc, runtime=runtime)
+    return header + body + _module_footer(runtime=runtime)
 
 
-def _module_header(doc: str | None) -> str:
+def _module_header(doc: str | None, *, runtime: str) -> str:
     doc_str = f'"""{doc}"""\n' if doc else '"""Transpiled from a PLUTO procedure."""\n'
+    module = "plutopy.async_runtime" if runtime == "async" else "plutopy.runtime"
     return (
         doc_str
-        + "from plutopy.runtime import (\n"
+        + f"from {module} import (\n"
         + "    Procedure, Event,\n"
         + "    switch_on, switch_off,\n"
         + "    initiate, initiate_and_confirm, initiate_and_confirm_step,\n"
@@ -43,7 +62,13 @@ def _module_header(doc: str | None) -> str:
     )
 
 
-def _module_footer() -> str:
+def _module_footer(*, runtime: str) -> str:
+    if runtime == "async":
+        return (
+            "\n\nif __name__ == \"__main__\":\n"
+            + INDENT + "import asyncio\n"
+            + INDENT + "asyncio.run(main())\n"
+        )
     return "\n\nif __name__ == \"__main__\":\n" + INDENT + "main()\n"
 
 
@@ -67,9 +92,20 @@ def _text_of_description(node: Tree) -> str:
 
 
 class _Emitter:
-    def __init__(self) -> None:
+    def __init__(self, *, runtime: str = "threaded") -> None:
         self._step_counter = 0
         self._var_counter = 0
+        self._runtime = runtime
+        self._is_async = runtime == "async"
+
+    # async helpers
+    @property
+    def _def(self) -> str:
+        return "async def" if self._is_async else "def"
+
+    @property
+    def _await(self) -> str:
+        return "await " if self._is_async else ""
 
     # ---- top-level ----
     def emit_procedure(self, proc: Tree) -> str:
@@ -90,7 +126,7 @@ class _Emitter:
                 confirmation = s
 
         lines: List[str] = []
-        lines.append("def main():")
+        lines.append(f"{self._def} main():")
         lines.append(f'{INDENT}proc = Procedure("transpiled")')
         lines.append(f"{INDENT}proc.start()")
 
@@ -105,7 +141,7 @@ class _Emitter:
                 ev_name = _text_of_name(handler.children[0])
                 self._step_counter += 1
                 fn_name = f"_watchdog_{self._step_counter}"
-                lines.append(f"{INDENT}def {fn_name}():")
+                lines.append(f"{INDENT}{self._def} {fn_name}():")
                 body = handler.children[1:]
                 if not body:
                     lines.append(f"{INDENT}{INDENT}pass")
@@ -152,20 +188,20 @@ class _Emitter:
 
     def _stmt_initiate_confirm_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
-        return [f"initiate_and_confirm({call})"]
+        return [f"{self._await}initiate_and_confirm({call})"]
 
     def _stmt_initiate_confirm_step(self, node: Tree) -> List[str]:
         step_name = _text_of_name(node.children[0])
         body_stmts = node.children[1:]
         self._step_counter += 1
         fn_name = f"_step_{self._step_counter}"
-        lines = [f"def {fn_name}():"]
+        lines = [f"{self._def} {fn_name}():"]
         if not body_stmts:
             lines.append(f"{INDENT}pass")
         else:
             for s in body_stmts:
                 lines.extend(_indent_block(self._emit_statement(s), 1))
-        lines.append(f'initiate_and_confirm_step("{step_name}", {fn_name})')
+        lines.append(f'{self._await}initiate_and_confirm_step("{step_name}", {fn_name})')
         return lines
 
     def _stmt_parallel_all_stmt(self, node: Tree) -> List[str]:
@@ -180,12 +216,12 @@ class _Emitter:
         for branch in node.children:
             self._step_counter += 1
             branch_fn = f"_branch_{self._step_counter}"
-            lines.append(f"def {branch_fn}():")
+            lines.append(f"{self._def} {branch_fn}():")
             inner = self._emit_statement(branch)
             for ln in _indent_block(inner, 1):
                 lines.append(ln)
             branch_names.append(branch_fn)
-        lines.append(f"{fn}([{', '.join(branch_names)}])")
+        lines.append(f"{self._await}{fn}([{', '.join(branch_names)}])")
         return lines
 
     def _stmt_context_stmt(self, node: Tree) -> List[str]:
@@ -301,13 +337,13 @@ class _Emitter:
         ev = _text_of_name(node.children[0])
         timeout = self._extract_timeout(node)
         timeout_arg = f", timeout={timeout}" if timeout else ""
-        return [f'wait_for_event(proc, "{ev}"{timeout_arg})']
+        return [f'{self._await}wait_for_event(proc, "{ev}"{timeout_arg})']
 
     def _stmt_wait_until_expr(self, node: Tree) -> List[str]:
         expr = self._emit_expression(node.children[0])
         timeout = self._extract_timeout(node)
         timeout_arg = f", timeout={timeout}" if timeout else ""
-        return [f"wait_until(lambda: {expr}{timeout_arg})"]
+        return [f"{self._await}wait_until(lambda: {expr}{timeout_arg})"]
 
     def _extract_timeout(self, node: Tree) -> str | None:
         for child in node.children:
@@ -330,7 +366,7 @@ class _Emitter:
 
     def _stmt_raise_stmt(self, node: Tree) -> List[str]:
         ev = _text_of_name(node.children[0])
-        return [f'proc.raise_event("{ev}")']
+        return [f'{self._await}proc.raise_event("{ev}")']
 
     # ---- activity calls ----
     def _emit_activity_call(self, node: Tree) -> str:
