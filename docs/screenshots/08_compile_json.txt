@@ -1,0 +1,46 @@
+{
+  "events": [
+    {
+      "name": "boom",
+      "description": "Critical failure"
+    }
+  ],
+  "watchdog": {
+    "boom": [
+      {
+        "kind": "inform_user",
+        "value": "\"watchdog handling boom\""
+      },
+      {
+        "kind": "initiate_and_confirm",
+        "call": {
+          "verb": "switch_off",
+          "target": "Reaction Wheel3"
+        }
+      }
+    ]
+  },
+  "preconditions": [],
+  "main": [
+    {
+      "kind": "initiate_and_confirm",
+      "call": {
+        "verb": "switch_on",
+        "target": "Reaction Wheel3"
+      }
+    },
+    {
+      "kind": "log",
+      "value": "\"about to raise boom\""
+    },
+    {
+      "kind": "raise",
+      "event": "boom"
+    },
+    {
+      "kind": "log",
+      "value": "\"after boom\""
+    }
+  ],
+  "confirmation": []
+}

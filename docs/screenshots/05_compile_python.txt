@@ -1,0 +1,70 @@
+"""Transpiled from 10_continuation_test.pluto"""
+from plutopy.runtime import (
+    Procedure,
+    Event,
+    PlutoAborted,
+    PlutoTerminated,
+    switch_on,
+    switch_off,
+    initiate,
+    initiate_and_confirm,
+    initiate_and_confirm_step,
+    parallel_until_all,
+    parallel_until_one,
+    wait_for_event,
+    wait_until,
+    inform_user,
+    pluto_log,
+)
+
+
+def main():
+    proc = Procedure("transpiled")
+    proc.start()
+    # --- main ---
+    def _step_1():
+        _restarts_2 = 0
+        while True:
+            try:
+                initiate_and_confirm(proc, switch_on("Reaction Wheel3 of AOC of Satellite"))
+                _cs_2 = "confirmed"
+            except PlutoAborted:
+                _cs_2 = "aborted"
+            except PlutoTerminated:
+                raise
+            except Exception:
+                _cs_2 = "not confirmed"
+            if _cs_2 == "confirmed":
+                break
+            elif _cs_2 == "not confirmed":
+                if _restarts_2 < 3:
+                    _restarts_2 += 1
+                    continue
+                break  # max restarts exhausted
+            elif _cs_2 == "aborted":
+                raise PlutoAborted("aborted by continuation test")
+            break  # fall-through
+    _restarts_3 = 0
+    while True:
+        try:
+            initiate_and_confirm_step(proc, "Bring Up Gyro Converter", _step_1)
+            _cs_3 = "confirmed"
+        except PlutoAborted:
+            _cs_3 = "aborted"
+        except PlutoTerminated:
+            raise
+        except Exception:
+            _cs_3 = "not confirmed"
+        if _cs_3 == "confirmed":
+            break
+        elif _cs_3 == "not confirmed":
+            raise PlutoTerminated("terminated by continuation test")
+        elif _cs_3 == "aborted":
+            raise PlutoAborted("aborted (default action)")
+        break  # fall-through
+    inform_user("Gyro converter is up")
+    proc.finish()
+
+
+if __name__ == "__main__":
+    main()

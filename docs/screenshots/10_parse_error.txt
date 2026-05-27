@@ -1,0 +1,5 @@
+plutopy: parse error
+at /tmp/bad.pluto:4:7: cannot start a token with 'l'; expected 'and', 'or', 'then', or one of 2 more
+
+     4 |       log "hi"
+       |       ^

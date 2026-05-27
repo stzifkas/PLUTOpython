@@ -1,0 +1,2 @@
+[ACTIVITY] Switch on Star Tracker1
+[INFORM] tracker step completed

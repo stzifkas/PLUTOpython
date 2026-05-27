@@ -1,0 +1,17 @@
+usage: plutopy [-h] [--version] [-v] {parse,compile,run,demo,fmt,gen} ...
+
+PLUTO -> Python transpiler
+
+positional arguments:
+  {parse,compile,run,demo,fmt,gen}
+    parse               show the parse tree of a PLUTO script
+    compile             transpile to Python
+    run                 transpile and execute
+    demo                live TUI dashboard (requires rich)
+    fmt                 canonicalise PLUTO source (pretty-print)
+    gen                 generate a PLUTO procedure from a YAML spec
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -v, --verbose         emit runtime lifecycle logs

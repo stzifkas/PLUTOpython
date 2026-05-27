@@ -1,0 +1,39 @@
+"""Transpiled from 04_events.pluto"""
+from plutopy.runtime import (
+    Procedure,
+    Event,
+    PlutoAborted,
+    PlutoTerminated,
+    switch_on,
+    switch_off,
+    initiate,
+    initiate_and_confirm,
+    initiate_and_confirm_step,
+    parallel_until_all,
+    parallel_until_one,
+    wait_for_event,
+    wait_until,
+    inform_user,
+    pluto_log,
+)
+
+
+class TranspiledProcedure(Procedure):
+    def __init__(self):
+        super().__init__("transpiled")
+        # --- declarations ---
+        self.declare_event(Event("ready", description='System bring up complete'))
+
+    def run(self):
+        self.start()
+        # --- main ---
+        pluto_log("raising ready")
+        self.raise_event("ready")
+        wait_for_event(self, "ready")
+        pluto_log("ready observed; continuing")
+        initiate_and_confirm(self, switch_on("Star Tracker1"))
+        self.finish()
+
+
+if __name__ == "__main__":
+    TranspiledProcedure().run()
