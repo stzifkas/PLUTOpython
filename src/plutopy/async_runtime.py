@@ -146,11 +146,17 @@ def switch_off(target: str) -> Callable[[], Awaitable[Any]]:
     return _call
 
 
-def initiate(proc: "Procedure", call: Callable[[], Awaitable[Any]]) -> asyncio.Task:
-    """Fire and forget: schedule the call but do not await it here."""
-    activity_name = getattr(call, "__pluto_name__", "activity")
+def initiate(proc: "Procedure", call: Callable[[], Awaitable[Any]],
+             instance_name: Optional[str] = None) -> asyncio.Task:
+    """Fire-and-forget: schedule the call but do not await it here.
+
+    When `instance_name` is given (PLUTO `refer by`), the activity is
+    registered under that name so `<property> of MY_INSTANCE`
+    references resolve to its execution state (spec A.3.9.27 / A.3.9.8).
+    """
+    activity_name = instance_name or getattr(call, "__pluto_name__", "activity")
     act_exec = proc.register_activity(activity_name)
-    
+
     async def wrapper():
         act_exec.start_time = datetime.now()
         act_exec.execution_status = "executing"
@@ -165,7 +171,7 @@ def initiate(proc: "Procedure", call: Callable[[], Awaitable[Any]]) -> asyncio.T
             raise
         finally:
             act_exec.completion_time = datetime.now()
-    
+
     return asyncio.create_task(wrapper())
 
 

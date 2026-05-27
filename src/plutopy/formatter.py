@@ -99,7 +99,11 @@ def _format_statement(stmt: Tree, depth: int) -> List[str]:
     pad = INDENT * depth
     d = stmt.data
     if d == "initiate_stmt":
-        return [f"{pad}initiate {_format_activity_call(stmt.children[0])}"]
+        head = f"{pad}initiate {_format_activity_call(stmt.children[0])}"
+        for c in stmt.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                head += f" refer by {_text_of_name(c.children[0])}"
+        return [head]
     if d == "initiate_confirm_stmt":
         ct = _continuation_test(stmt)
         head = f"{pad}initiate and confirm {_format_activity_call(stmt.children[0])}"
@@ -336,6 +340,12 @@ def _format_expression(node) -> str:
         return _text_of_qname(node.children[0])
     if d == "qname":
         return _text_of_qname(node)
+    if d == "prop_req":
+        # node.children[0] is the property_request tree
+        pr = node.children[0]
+        prop_name = " ".join(str(t) for t in pr.children[0].children)
+        target = _text_of_qname(pr.children[1])
+        return f"{prop_name} of {target}"
     if d == "not_op":
         return f"not {_format_expression(node.children[0])}"
     if d == "or_expr":

@@ -57,7 +57,8 @@ confirmation_section: "confirmation" statement+ "end" "confirmation"
           | inform_stmt
           | raise_stmt
 
-initiate_stmt: "initiate" activity_call
+initiate_stmt: "initiate" activity_call refer_by?
+refer_by: "refer" "by" name
 initiate_confirm_stmt: "initiate" "and" "confirm" activity_call continuation_test?
 initiate_confirm_step: "initiate" "and" "confirm" "step" name "main" statement+ "end" "main" "end" "step" continuation_test?
 

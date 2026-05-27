@@ -155,8 +155,19 @@ def switch_off(target: str) -> Callable[[], Any]:
     return _call
 
 
-def initiate(*args) -> threading.Thread:
-    """Initiate an activity. Accepts either initiate(call) or initiate(proc, call)."""
+def initiate(*args, instance_name: Optional[str] = None) -> threading.Thread:
+    """Fire-and-forget an activity.
+
+    Signatures:
+      initiate(call)
+      initiate(proc, call)
+      initiate(proc, call, instance_name="MY_INSTANCE")   # from `refer by`
+
+    When `instance_name` is given (PLUTO `refer by`), the activity is
+    registered under that name on the procedure so subsequent
+    `<property> of MY_INSTANCE` references resolve to its execution
+    state (spec A.3.9.27 + A.3.9.8).
+    """
     if len(args) == 1:
         call = args[0]
         t = threading.Thread(target=call, name=getattr(call, "__pluto_name__", "activity"))
@@ -164,7 +175,7 @@ def initiate(*args) -> threading.Thread:
         return t
     if len(args) == 2:
         proc, call = args
-        activity_name = getattr(call, "__pluto_name__", "activity")
+        activity_name = instance_name or getattr(call, "__pluto_name__", "activity")
         act_exec = proc.register_activity(activity_name)
 
         def wrapper():
@@ -184,7 +195,7 @@ def initiate(*args) -> threading.Thread:
         t = threading.Thread(target=wrapper, name=activity_name)
         t.start()
         return t
-    raise TypeError("initiate takes 1 or 2 arguments")
+    raise TypeError("initiate takes 1 or 2 positional args")
 
 
 def initiate_and_confirm(*args) -> Any:

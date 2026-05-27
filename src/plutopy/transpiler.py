@@ -271,7 +271,13 @@ class _Emitter:
 
     def _stmt_initiate_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
-        return [f"initiate({self._receiver}, {call})"]
+        instance = None
+        for c in node.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                instance = _text_of_name(c.children[0])
+        if instance is None:
+            return [f"initiate({self._receiver}, {call})"]
+        return [f'initiate({self._receiver}, {call}, instance_name="{instance}")']
 
     def _stmt_initiate_confirm_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])

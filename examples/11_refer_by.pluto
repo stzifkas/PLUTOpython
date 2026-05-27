@@ -1,0 +1,12 @@
+// `refer by` (PLUTO spec A.3.9.27): name a fire-and-forget activity
+// instance so we can later query its execution_status.
+procedure
+    main
+      initiate Switch on Star Tracker1 refer by TRACKER1_BOOT
+      // proceed with other work while it boots ...
+      inform user "tracker boot kicked off"
+      // ... eventually wait until it has actually succeeded
+      wait until execution_status of TRACKER1_BOOT = "success"
+      inform user "tracker is up"
+    end main
+end procedure

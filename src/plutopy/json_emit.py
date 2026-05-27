@@ -90,7 +90,11 @@ def _event_decl_to_dict(decl: Tree) -> Dict[str, Any]:
 def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
     d = stmt.data
     if d == "initiate_stmt":
-        return {"kind": "initiate", "call": _activity_call_to_dict(stmt.children[0])}
+        out = {"kind": "initiate", "call": _activity_call_to_dict(stmt.children[0])}
+        for c in stmt.children[1:]:
+            if isinstance(c, Tree) and c.data == "refer_by":
+                out["refer_by"] = _name_text(c.children[0])
+        return out
     if d == "initiate_confirm_stmt":
         ct = _continuation_test_dict(stmt)
         out = {"kind": "initiate_and_confirm", "call": _activity_call_to_dict(stmt.children[0])}
