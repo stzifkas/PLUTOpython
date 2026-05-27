@@ -33,6 +33,8 @@ def main(argv: list[str] | None = None) -> int:
                            help="target runtime (default: threaded)")
     p_compile.add_argument("--style", choices=("functions", "class"), default="functions",
                            help="emit a free main() function or a Procedure subclass (default: functions)")
+    p_compile.add_argument("--emit", choices=("python", "json"), default="python",
+                           help="output format (default: python)")
 
     p_run = sub.add_parser("run", help="transpile and execute")
     p_run.add_argument("script", type=pathlib.Path)
@@ -71,19 +73,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "compile":
         try:
-            py = transpile(
-                args.script.read_text(),
-                module_doc=f"Transpiled from {args.script.name}",
-                runtime=args.runtime,
-                style=args.style,
-            )
+            if args.emit == "json":
+                from plutopy.json_emit import transpile_to_json
+                out = transpile_to_json(args.script.read_text(), filename=str(args.script))
+                if not out.endswith("\n"):
+                    out += "\n"
+            else:
+                out = transpile(
+                    args.script.read_text(),
+                    module_doc=f"Transpiled from {args.script.name}",
+                    runtime=args.runtime,
+                    style=args.style,
+                )
         except PlutoParseError as e:
             print(f"plutopy: parse error\n{e}", file=sys.stderr)
             return 1
         if args.output:
-            args.output.write_text(py)
+            args.output.write_text(out)
         else:
-            sys.stdout.write(py)
+            sys.stdout.write(out)
         return 0
 
     if args.cmd == "demo":
