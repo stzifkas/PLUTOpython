@@ -1,6 +1,6 @@
 # PLUTOpython
 
-> A PLUTO ([ECSS-E-ST-70-31C](https://ecss.nl/standard/ecss-e-st-70-31c-ground-systems-and-operations-monitoring-and-control-data-definition-and-command-procedure-definition/)) to Python transpiler and runtime.
+> A PLUTO ([ECSS-E-ST-70-32C](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/)) to Python transpiler and runtime.
 > Take a spacecraft operations procedure written in PLUTO, get back a runnable Python program.
 
 📚 **[Read the docs](https://stzifkas.github.io/PLUTOpython/)** · 🎮 **[Web playground](https://stzifkas.github.io/PLUTOpython/playground/)** · 🛰 **[TUI demo](#the-tui-demo)** · 🧭 **[Finish-Up-A-Thon arc](#the-finish-up-a-thon-arc)**
@@ -333,4 +333,4 @@ To stay shippable for the Finish-Up-A-Thon deadline:
 - Original GSoC 2019 proposal & prototype: Sokratis Tzifkas
 - 2026 revival for the Finish-Up-A-Thon: Sokratis Tzifkas, with AI assistance
 - Built on [Lark](https://github.com/lark-parser/lark)
-- PLUTO language defined by the ECSS-E-ST-70-31C standard (European Cooperation for Space Standardization)
+- PLUTO language defined by the ECSS-E-ST-70-32C standard (European Cooperation for Space Standardization)

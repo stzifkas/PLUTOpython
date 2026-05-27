@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plutopy"
-version = "0.2.0"
-description = "PLUTO (ECSS-E-ST-70-31C) to Python transpiler and runtime"
+version = "0.3.0"
+description = "PLUTO (ECSS-E-ST-70-32C) spacecraft-operations DSL to Python transpiler and runtime"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -42,8 +42,12 @@ plutopy = "plutopy.cli:main"
 pluto = "plutopy.pygments_lexer:PlutoLexer"
 
 [project.urls]
-Homepage = "https://github.com/stzifkas/PLUTOpython"
-Repository = "https://github.com/stzifkas/PLUTOpython"
+Homepage      = "https://github.com/stzifkas/PLUTOpython"
+Repository    = "https://github.com/stzifkas/PLUTOpython"
+Documentation = "https://stzifkas.github.io/PLUTOpython/"
+Playground    = "https://stzifkas.github.io/PLUTOpython/playground/"
+Issues        = "https://github.com/stzifkas/PLUTOpython/issues"
+Changelog     = "https://github.com/stzifkas/PLUTOpython/releases"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

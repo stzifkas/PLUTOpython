@@ -1,6 +1,6 @@
 # PLUTOpython
 
-A PLUTO ([ECSS-E-ST-70-31C](https://ecss.nl/standard/ecss-e-st-70-31c-ground-systems-and-operations-monitoring-and-control-data-definition-and-command-procedure-definition/)) to Python transpiler and runtime.
+A PLUTO ([ECSS-E-ST-70-32C](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/)) to Python transpiler and runtime.
 
 Take a spacecraft operations procedure written in PLUTO and get back a runnable Python program.
 

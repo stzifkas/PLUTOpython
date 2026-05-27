@@ -1,4 +1,4 @@
-// PLUTO grammar (subset of ECSS-E-ST-70-31C)
+// PLUTO grammar (subset of ECSS-E-ST-70-32C)
 // Parsed with Earley; semicolons are ignored as separators so that scripts
 // can use them or newlines interchangeably.
 
