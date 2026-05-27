@@ -3,6 +3,8 @@
 > A PLUTO ([ECSS-E-ST-70-31C](https://ecss.nl/standard/ecss-e-st-70-31c-ground-systems-and-operations-monitoring-and-control-data-definition-and-command-procedure-definition/)) to Python transpiler and runtime.
 > Take a spacecraft operations procedure written in PLUTO, get back a runnable Python program.
 
+📚 **[Read the docs](https://stzifkas.github.io/PLUTOpython/)** · 🛰 **[Run the demo](#the-tui-demo)** · 🧭 **[Finish-Up-A-Thon arc](#the-finish-up-a-thon-arc)**
+
 PLUTO is the procedure language standardised by ECSS for spacecraft monitoring and command. It's the DSL operators write when they need to bring up a star tracker, run a parallel safety sequence, or react to an on-board event. `plutopy` parses that DSL with [Lark](https://github.com/lark-parser/lark) and emits a readable Python module that calls into a small runtime library.
 
 ```pluto
@@ -71,6 +73,8 @@ You can still see all of this — just check out the `legacy/gsoc-2019` branch.
 | CI | GitHub Actions matrix on Python 3.9 / 3.11 / 3.13 |
 | Demo | `plutopy demo` — live Rich-based TUI of a fake satellite reacting to PLUTO activities in real time |
 | Error messages | Friendly parse errors with file:line:column, source caret, and structural hints (vs. raw Lark exceptions in 2019) |
+| Highlighter | Pygments lexer for `.pluto`, registered as an entry point, picked up automatically by mkdocs / Jupyter / GitHub / Sphinx |
+| Docs | mkdocs site at `docs/`, deployed on every push to `main` |
 
 > This revival was AI-assisted: I used an AI coding assistant to accelerate the rebuild, particularly for designing the Lark grammar's keyword-priority resolution (the original grammar had brittle negative-lookahead patterns that broke on common keywords), the transpiler's parse-tree-walker, and the runtime's threading primitives. The architectural decisions, the choice to write a transpiler instead of an interpreter, and the test design are mine; the assistant accelerated the typing and surfaced an Earley-lexer-priority bug that would have cost me a couple of hours otherwise.
 
