@@ -13,7 +13,7 @@ import sys
 import tempfile
 
 from plutopy import __version__
-from plutopy.parser import parse as parse_pluto
+from plutopy.parser import parse as parse_pluto, PlutoParseError
 from plutopy.transpiler import transpile
 
 
@@ -44,12 +44,20 @@ def main(argv: list[str] | None = None) -> int:
         logging.basicConfig(level=logging.INFO, format="%(name)s: %(message)s")
 
     if args.cmd == "parse":
-        tree = parse_pluto(args.script.read_text())
+        try:
+            tree = parse_pluto(args.script.read_text(), filename=str(args.script))
+        except PlutoParseError as e:
+            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            return 1
         print(tree.pretty())
         return 0
 
     if args.cmd == "compile":
-        py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        try:
+            py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        except PlutoParseError as e:
+            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            return 1
         if args.output:
             args.output.write_text(py)
         else:
@@ -61,7 +69,11 @@ def main(argv: list[str] | None = None) -> int:
         return run_demo(args.script)
 
     if args.cmd == "run":
-        py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        try:
+            py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")
+        except PlutoParseError as e:
+            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            return 1
         with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
             tmp.write(py)
             tmp_path = tmp.name

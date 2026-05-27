@@ -70,6 +70,7 @@ You can still see all of this — just check out the `legacy/gsoc-2019` branch.
 | Tests | 24 pytest cases covering the parser, transpiler output validity, runtime behaviour, and end-to-end CLI |
 | CI | GitHub Actions matrix on Python 3.9 / 3.11 / 3.13 |
 | Demo | `plutopy demo` — live Rich-based TUI of a fake satellite reacting to PLUTO activities in real time |
+| Error messages | Friendly parse errors with file:line:column, source caret, and structural hints (vs. raw Lark exceptions in 2019) |
 
 > This revival was AI-assisted: I used an AI coding assistant to accelerate the rebuild, particularly for designing the Lark grammar's keyword-priority resolution (the original grammar had brittle negative-lookahead patterns that broke on common keywords), the transpiler's parse-tree-walker, and the runtime's threading primitives. The architectural decisions, the choice to write a transpiler instead of an interpreter, and the test design are mine; the assistant accelerated the typing and surfaced an Earley-lexer-priority bug that would have cost me a couple of hours otherwise.
 
@@ -101,6 +102,19 @@ plutopy -v run examples/04_events.pluto    # with runtime lifecycle logs
 
 # 4. Live TUI dashboard (requires `pip install plutopy[tui]`)
 plutopy demo examples/05_full_bringup.pluto
+```
+
+### Friendly parse errors
+
+```text
+$ plutopy parse bad.pluto
+plutopy: parse error
+at bad.pluto:7:7: cannot start a token with 'l'; expected 'and', 'or', 'then', or one of 2 more
+
+     7 |       log "hi"
+       |       ^
+
+hint: an if statement looks like: if EXPR then STATEMENTS end if
 ```
 
 ### The TUI demo

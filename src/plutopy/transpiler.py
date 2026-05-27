@@ -19,9 +19,9 @@ class TranspileError(Exception):
     pass
 
 
-def transpile(source: str, *, module_doc: str | None = None) -> str:
+def transpile(source: str, *, module_doc: str | None = None, filename: str | None = None) -> str:
     """Transpile a PLUTO source string into runnable Python source."""
-    tree = parse_pluto(source)
+    tree = parse_pluto(source, filename=filename)
     emitter = _Emitter()
     body = emitter.emit_procedure(tree.children[0])
     header = _module_header(module_doc)
