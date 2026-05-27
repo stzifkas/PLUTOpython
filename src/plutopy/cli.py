@@ -34,6 +34,9 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("script", type=pathlib.Path)
     p_run.add_argument("--keep", action="store_true", help="keep transpiled .py file and print its path")
 
+    p_demo = sub.add_parser("demo", help="live TUI dashboard (requires rich)")
+    p_demo.add_argument("script", type=pathlib.Path, nargs="?", help="optional .pluto script; defaults to examples/05_full_bringup.pluto")
+
     args = ap.parse_args(argv)
 
     if args.verbose:
@@ -52,6 +55,10 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(py)
         return 0
+
+    if args.cmd == "demo":
+        from plutopy.demo import run_demo
+        return run_demo(args.script)
 
     if args.cmd == "run":
         py = transpile(args.script.read_text(), module_doc=f"Transpiled from {args.script.name}")

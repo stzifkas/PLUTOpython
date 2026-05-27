@@ -29,7 +29,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "rich>=13"]
+tui = ["rich>=13"]
 
 [project.scripts]
 plutopy = "plutopy.cli:main"
