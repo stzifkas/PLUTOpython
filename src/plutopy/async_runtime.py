@@ -25,6 +25,14 @@ class PlutoRuntimeError(RuntimeError):
     pass
 
 
+class PlutoAborted(Exception):
+    """`abort` continuation action — propagates out of the procedure body."""
+
+
+class PlutoTerminated(Exception):
+    """`terminate` continuation action — jumps to the confirmation body."""
+
+
 CallableOrCoro = Union[Callable[[], Any], Awaitable[Any]]
 
 

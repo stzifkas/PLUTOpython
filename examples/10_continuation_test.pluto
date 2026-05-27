@@ -1,0 +1,25 @@
+// Continuation test (PLUTO spec A.3.9.33).
+// The example mirrors the canonical Switch on Gyro5 procedure from
+// the spec, exercising `restart max N times`, `terminate`, default
+// actions and the propagation of `aborted`.
+procedure
+    main
+      initiate and confirm step Bring Up Gyro Converter
+        main
+          // The default Switch on handler always succeeds; this arm is
+          // therefore never taken in this script, but the emitted retry
+          // loop and counter are valid PLUTO.
+          initiate and confirm Switch on Reaction Wheel3 of AOC of Satellite
+            in case
+              not confirmed: restart max 3 times;
+              aborted: abort;
+            end case;
+        end main
+      end step
+        in case
+          confirmed: continue;
+          not confirmed: terminate;
+        end case
+      inform user "Gyro converter is up"
+    end main
+end procedure

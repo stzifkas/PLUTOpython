@@ -58,8 +58,35 @@ confirmation_section: "confirmation" statement+ "end" "confirmation"
           | raise_stmt
 
 initiate_stmt: "initiate" activity_call
-initiate_confirm_stmt: "initiate" "and" "confirm" activity_call
-initiate_confirm_step: "initiate" "and" "confirm" "step" name "main" statement+ "end" "main" "end" "step"
+initiate_confirm_stmt: "initiate" "and" "confirm" activity_call continuation_test?
+initiate_confirm_step: "initiate" "and" "confirm" "step" name "main" statement+ "end" "main" "end" "step" continuation_test?
+
+// ---- continuation test (spec A.3.9.33) ----
+continuation_test: "in" "case" continuation_arm+ "end" "case"
+continuation_arm: confirmation_status_label ":" continuation_action
+
+?confirmation_status_label: cs_confirmed | cs_not_confirmed | cs_aborted
+cs_confirmed:     "confirmed"
+cs_not_confirmed: "not" "confirmed"
+cs_aborted:       "aborted"
+
+?continuation_action: act_resume
+                    | act_abort
+                    | act_restart
+                    | act_ask
+                    | act_raise
+                    | act_continue
+                    | act_terminate
+act_resume:   "resume"
+act_abort:    "abort"
+act_continue: "continue"
+act_terminate:"terminate"
+act_ask:      "ask" "user"
+act_raise:    "raise" "event" name
+act_restart:  "restart" restart_limit?
+?restart_limit: restart_max | restart_timeout
+restart_max:     "max" expression "times"
+restart_timeout: "with" "timeout" expression
 
 parallel_all_stmt: "in" "parallel" "until" "all" "complete" statement+ "end" "parallel"
 parallel_one_stmt: "in" "parallel" "until" "one" "completes" statement+ "end" "parallel"

@@ -20,6 +20,18 @@ class PlutoRuntimeError(RuntimeError):
     pass
 
 
+class PlutoAborted(Exception):
+    """Raised by an `abort` continuation action. Propagates out of the
+    procedure body, terminating execution with confirmation_status
+    'aborted' (spec A.2.5, A.3.9.33)."""
+
+
+class PlutoTerminated(Exception):
+    """Raised by a `terminate` continuation action. The procedure (or
+    step) main body ends prematurely; the confirmation body runs next
+    (spec A.3.9.33)."""
+
+
 @dataclass
 class Event:
     name: str

@@ -65,6 +65,7 @@ def transpile(
 
 _RUNTIME_PUBLIC_NAMES = (
     "Procedure", "Event",
+    "PlutoAborted", "PlutoTerminated",
     "switch_on", "switch_off",
     "initiate", "initiate_and_confirm", "initiate_and_confirm_step",
     "parallel_until_all", "parallel_until_one",
@@ -274,11 +275,17 @@ class _Emitter:
 
     def _stmt_initiate_confirm_stmt(self, node: Tree) -> List[str]:
         call = self._emit_activity_call(node.children[0])
-        return [f"{self._await}initiate_and_confirm({self._receiver}, {call})"]
+        ct = _continuation_test_node(node)
+        invocation = f"{self._await}initiate_and_confirm({self._receiver}, {call})"
+        if ct is None:
+            return [invocation]
+        return self._emit_with_continuation(invocation, ct)
 
     def _stmt_initiate_confirm_step(self, node: Tree) -> List[str]:
         step_name = _text_of_name(node.children[0])
-        body_stmts = node.children[1:]
+        # children: name, statement..., continuation_test?
+        ct = _continuation_test_node(node)
+        body_stmts = [c for c in node.children[1:] if not _is_continuation_test(c)]
         self._step_counter += 1
         fn_name = f"_step_{self._step_counter}"
         lines = [f"{self._def} {fn_name}():"]
@@ -287,8 +294,139 @@ class _Emitter:
         else:
             for s in body_stmts:
                 lines.extend(_indent_block(self._emit_statement(s), 1))
-        lines.append(f'{self._await}initiate_and_confirm_step({self._receiver}, "{step_name}", {fn_name})')
+        invocation = (
+            f'{self._await}initiate_and_confirm_step('
+            f'{self._receiver}, "{step_name}", {fn_name})'
+        )
+        if ct is None:
+            lines.append(invocation)
+            return lines
+        lines.extend(self._emit_with_continuation(invocation, ct))
         return lines
+
+    def _emit_with_continuation(self, invocation: str, ct: Tree) -> List[str]:
+        """Wrap an `initiate and confirm` invocation in the retry/dispatch
+        loop dictated by a `continuation_test` (PLUTO spec A.3.9.33).
+
+        Emits a while-True loop that:
+          * runs the invocation,
+          * captures its confirmation status ("confirmed" / "not confirmed"
+            / "aborted"),
+          * dispatches on the user-specified arms (defaults per A.2.5),
+          * implements restart [max N times | with timeout T] by `continue`,
+          * implements abort/terminate by raising PlutoAborted/PlutoTerminated,
+          * applies `continue` / `resume` by breaking out of the loop.
+        """
+        self._step_counter += 1
+        n = self._step_counter
+        cs = f"_cs_{n}"
+        restarts = f"_restarts_{n}"
+        deadline = f"_deadline_{n}"
+        # Pre-compute arms keyed by normalized status.
+        arms: dict[str, Tree] = {}
+        for arm in ct.children:
+            label_node, action_node = arm.children[0], arm.children[1]
+            label_key = {
+                "cs_confirmed": "confirmed",
+                "cs_not_confirmed": "not confirmed",
+                "cs_aborted": "aborted",
+            }[label_node.data]
+            arms[label_key] = action_node
+
+        # If any arm uses `restart with timeout`, we need a deadline.
+        needs_deadline = any(
+            _restart_limit(a) and _restart_limit(a).data == "restart_timeout"
+            for a in arms.values()
+        )
+
+        lines: List[str] = []
+        lines.append(f"{restarts} = 0")
+        if needs_deadline:
+            lines.append(f"{deadline} = __import__('time').time() + 0  # set on first restart-with-timeout")
+        lines.append("while True:")
+        lines.append(f"{INDENT}try:")
+        lines.append(f"{INDENT}{INDENT}{invocation}")
+        lines.append(f'{INDENT}{INDENT}{cs} = "confirmed"')
+        lines.append(f"{INDENT}except PlutoAborted:")
+        lines.append(f'{INDENT}{INDENT}{cs} = "aborted"')
+        lines.append(f"{INDENT}except PlutoTerminated:")
+        lines.append(f"{INDENT}{INDENT}raise")
+        lines.append(f"{INDENT}except Exception:")
+        lines.append(f'{INDENT}{INDENT}{cs} = "not confirmed"')
+
+        # Defaults per spec A.2.5: confirmed -> continue; otherwise -> abort.
+        default_action = {
+            "confirmed":     ("continue",),
+            "not confirmed": ("abort",),
+            "aborted":       ("abort",),
+        }
+
+        first = True
+        for status in ("confirmed", "not confirmed", "aborted"):
+            arm_action = arms.get(status)
+            keyword = "if" if first else "elif"
+            first = False
+            lines.append(f'{INDENT}{keyword} {cs} == "{status}":')
+            if arm_action is not None:
+                lines.extend(_indent_block(
+                    self._emit_action(arm_action, restarts, deadline), 2,
+                ))
+            else:
+                lines.extend(_indent_block(
+                    self._emit_default_action(default_action[status][0]), 2,
+                ))
+        lines.append(f"{INDENT}break  # fall-through")
+        return lines
+
+    def _emit_action(self, action: Tree, restarts: str, deadline: str) -> List[str]:
+        kind = action.data
+        if kind in ("act_resume", "act_continue"):
+            return ["break"]
+        if kind == "act_abort":
+            return ['raise PlutoAborted("aborted by continuation test")']
+        if kind == "act_terminate":
+            return ['raise PlutoTerminated("terminated by continuation test")']
+        if kind == "act_ask":
+            return [
+                f'_resp = input("[ask user] action? (resume / abort / restart): ").strip().lower()',
+                f'if _resp == "abort": raise PlutoAborted("aborted by user")',
+                f'if _resp == "restart": continue',
+                f"break",
+            ]
+        if kind == "act_raise":
+            ev = _text_of_name(action.children[0])
+            call_raise = f'{self._await}{self._receiver}.raise_event("{ev}")'
+            return [call_raise, "break"]
+        if kind == "act_restart":
+            limit = _restart_limit(action)
+            if limit is None:
+                return [f"{restarts} += 1", "continue"]
+            if limit.data == "restart_max":
+                bound = self._emit_expression(limit.children[0])
+                return [
+                    f"if {restarts} < {bound}:",
+                    f"{INDENT}{restarts} += 1",
+                    f"{INDENT}continue",
+                    "break  # max restarts exhausted",
+                ]
+            if limit.data == "restart_timeout":
+                t = self._emit_expression(limit.children[0])
+                return [
+                    f"if {restarts} == 0:",
+                    f"{INDENT}{deadline} = __import__('time').time() + {t}",
+                    f"if __import__('time').time() < {deadline}:",
+                    f"{INDENT}{restarts} += 1",
+                    f"{INDENT}continue",
+                    "break  # restart deadline exceeded",
+                ]
+        raise TranspileError(f"unsupported continuation action: {kind}")
+
+    def _emit_default_action(self, kind: str) -> List[str]:
+        if kind == "continue":
+            return ["break"]
+        if kind == "abort":
+            return ['raise PlutoAborted("aborted (default action)")']
+        raise TranspileError(f"bad default action: {kind}")
 
     def _stmt_parallel_all_stmt(self, node: Tree) -> List[str]:
         return self._emit_parallel(node, "parallel_until_all")
@@ -513,6 +651,26 @@ class _Emitter:
         prop_name = _text_of_name(prop_name_node)
         activity_name = _text_of_qname(qname_node)
         return f'{self._receiver}.get_property("{activity_name}", "{prop_name}")'
+
+
+def _is_continuation_test(c) -> bool:
+    return isinstance(c, Tree) and c.data == "continuation_test"
+
+
+def _continuation_test_node(node: Tree) -> Tree | None:
+    for c in node.children:
+        if _is_continuation_test(c):
+            return c
+    return None
+
+
+def _restart_limit(action: Tree) -> Tree | None:
+    if action.data != "act_restart":
+        return None
+    for c in action.children:
+        if isinstance(c, Tree) and c.data in ("restart_max", "restart_timeout"):
+            return c
+    return None
 
 
 def _emit_binop_chain(children, emit) -> str:

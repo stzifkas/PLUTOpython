@@ -101,7 +101,11 @@ def _format_statement(stmt: Tree, depth: int) -> List[str]:
     if d == "initiate_stmt":
         return [f"{pad}initiate {_format_activity_call(stmt.children[0])}"]
     if d == "initiate_confirm_stmt":
-        return [f"{pad}initiate and confirm {_format_activity_call(stmt.children[0])}"]
+        ct = _continuation_test(stmt)
+        head = f"{pad}initiate and confirm {_format_activity_call(stmt.children[0])}"
+        if ct is None:
+            return [head]
+        return [head] + _format_continuation_test(ct, depth + 1)
     if d == "initiate_confirm_step":
         return _format_step(stmt, depth)
     if d == "parallel_all_stmt":
@@ -151,7 +155,8 @@ def _format_step(stmt: Tree, depth: int) -> List[str]:
     pad = INDENT * depth
     inner = INDENT * (depth + 1)
     name = _text_of_name(stmt.children[0])
-    body = stmt.children[1:]
+    ct = _continuation_test(stmt)
+    body = [c for c in stmt.children[1:] if not (isinstance(c, Tree) and c.data == "continuation_test")]
     lines = [
         f"{pad}initiate and confirm step {name}",
         f"{inner}main",
@@ -160,7 +165,56 @@ def _format_step(stmt: Tree, depth: int) -> List[str]:
         lines.extend(_format_statement(s, depth + 2))
     lines.append(f"{inner}end main")
     lines.append(f"{pad}end step")
+    if ct is not None:
+        lines.extend(_format_continuation_test(ct, depth + 1))
     return lines
+
+
+def _continuation_test(stmt: Tree) -> Tree | None:
+    for c in stmt.children:
+        if isinstance(c, Tree) and c.data == "continuation_test":
+            return c
+    return None
+
+
+_CS_LABEL = {
+    "cs_confirmed": "confirmed",
+    "cs_not_confirmed": "not confirmed",
+    "cs_aborted": "aborted",
+}
+
+
+def _format_continuation_test(ct: Tree, depth: int) -> List[str]:
+    pad = INDENT * depth
+    inner = INDENT * (depth + 1)
+    lines = [f"{pad}in case"]
+    for arm in ct.children:
+        label = _CS_LABEL[arm.children[0].data]
+        action_str = _format_continuation_action(arm.children[1])
+        lines.append(f"{inner}{label}: {action_str}")
+    lines.append(f"{pad}end case")
+    return lines
+
+
+def _format_continuation_action(action: Tree) -> str:
+    kind = action.data
+    if kind == "act_resume":    return "resume"
+    if kind == "act_abort":     return "abort"
+    if kind == "act_continue":  return "continue"
+    if kind == "act_terminate": return "terminate"
+    if kind == "act_ask":       return "ask user"
+    if kind == "act_raise":
+        return f"raise event {_text_of_name(action.children[0])}"
+    if kind == "act_restart":
+        limit_nodes = [c for c in action.children if isinstance(c, Tree)
+                       and c.data in ("restart_max", "restart_timeout")]
+        if not limit_nodes:
+            return "restart"
+        limit = limit_nodes[0]
+        if limit.data == "restart_max":
+            return f"restart max {_format_expression(limit.children[0])} times"
+        return f"restart with timeout {_format_expression(limit.children[0])}"
+    return f"// unsupported action: {kind}"
 
 
 def _format_parallel(opener: str, stmt: Tree, depth: int) -> List[str]:

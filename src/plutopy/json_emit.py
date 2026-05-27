@@ -92,13 +92,22 @@ def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
     if d == "initiate_stmt":
         return {"kind": "initiate", "call": _activity_call_to_dict(stmt.children[0])}
     if d == "initiate_confirm_stmt":
-        return {"kind": "initiate_and_confirm", "call": _activity_call_to_dict(stmt.children[0])}
+        ct = _continuation_test_dict(stmt)
+        out = {"kind": "initiate_and_confirm", "call": _activity_call_to_dict(stmt.children[0])}
+        if ct is not None:
+            out["continuation_test"] = ct
+        return out
     if d == "initiate_confirm_step":
-        return {
+        body = [c for c in stmt.children[1:] if not (isinstance(c, Tree) and c.data == "continuation_test")]
+        out = {
             "kind": "step",
             "name": _name_text(stmt.children[0]),
-            "body": [_stmt_to_dict(s) for s in stmt.children[1:]],
+            "body": [_stmt_to_dict(s) for s in body],
         }
+        ct = _continuation_test_dict(stmt)
+        if ct is not None:
+            out["continuation_test"] = ct
+        return out
     if d == "parallel_all_stmt":
         return {"kind": "parallel", "mode": "all", "branches": [_stmt_to_dict(b) for b in stmt.children]}
     if d == "parallel_one_stmt":
@@ -197,6 +206,39 @@ def _stmt_to_dict(stmt: Tree) -> Dict[str, Any]:
     if d == "raise_stmt":
         return {"kind": "raise", "event": _name_text(stmt.children[0])}
     return {"kind": "unknown", "rule": d}
+
+
+_CS_LABEL_J = {
+    "cs_confirmed": "confirmed",
+    "cs_not_confirmed": "not confirmed",
+    "cs_aborted": "aborted",
+}
+
+
+def _continuation_test_dict(stmt: Tree) -> List[Dict[str, Any]] | None:
+    for c in stmt.children:
+        if isinstance(c, Tree) and c.data == "continuation_test":
+            return [_arm_to_dict(a) for a in c.children]
+    return None
+
+
+def _arm_to_dict(arm: Tree) -> Dict[str, Any]:
+    label = _CS_LABEL_J[arm.children[0].data]
+    return {"status": label, "action": _action_to_dict(arm.children[1])}
+
+
+def _action_to_dict(action: Tree) -> Dict[str, Any]:
+    kind = action.data.removeprefix("act_")
+    out: Dict[str, Any] = {"kind": kind}
+    if action.data == "act_raise":
+        out["event"] = _name_text(action.children[0])
+    elif action.data == "act_restart":
+        for c in action.children:
+            if isinstance(c, Tree) and c.data == "restart_max":
+                out["max_times"] = _expression_to_str(c.children[0])
+            elif isinstance(c, Tree) and c.data == "restart_timeout":
+                out["timeout"] = _expression_to_str(c.children[0])
+    return out
 
 
 def _activity_call_to_dict(node: Tree) -> Dict[str, Any]:
