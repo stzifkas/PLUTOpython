@@ -1,0 +1,40 @@
+# Example procedure spec. Generate with:
+#   plutopy gen examples/specs/bringup.yaml -o generated.pluto
+# Then run:
+#   plutopy run generated.pluto
+procedure: BringUp
+
+declare:
+  - event: ready
+    description: System bring up complete
+  - event: boom
+
+watchdog:
+  boom:
+    - inform_user: "watchdog handling boom"
+    - initiate_and_confirm:
+        switch_off: Reaction Wheel3
+
+main:
+  - log: "starting bring up"
+  - assign: { var: counter, value: 0 }
+  - while:
+      condition: "counter < 2"
+      body:
+        - log: "attempt"
+        - parallel:
+            mode: all
+            branches:
+              - step:
+                  name: BRING UP REACTION WHEEL
+                  body:
+                    - initiate_and_confirm:
+                        switch_on: Reaction Wheel3 of AOC of Satellite
+              - step:
+                  name: BRING UP STAR TRACKER
+                  body:
+                    - initiate_and_confirm:
+                        switch_on: Star Tracker1
+        - assign: { var: counter, value: "counter + 1" }
+  - raise: ready
+  - inform_user: "bring up complete"

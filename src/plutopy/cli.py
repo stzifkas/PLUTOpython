@@ -42,6 +42,10 @@ def main(argv: list[str] | None = None) -> int:
     p_fmt.add_argument("-i", "--in-place", action="store_true", help="rewrite the file in place")
     p_fmt.add_argument("--check", action="store_true", help="exit non-zero if the file isn't already canonical")
 
+    p_gen = sub.add_parser("gen", help="generate a PLUTO procedure from a YAML spec")
+    p_gen.add_argument("spec", type=pathlib.Path, help="YAML spec file")
+    p_gen.add_argument("-o", "--output", type=pathlib.Path, help="output .pluto path (default: stdout)")
+
     args = ap.parse_args(argv)
 
     if args.verbose:
@@ -72,6 +76,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "demo":
         from plutopy.demo import run_demo
         return run_demo(args.script)
+
+    if args.cmd == "gen":
+        from plutopy.generator import generate_from_file, GeneratorError
+        try:
+            out = generate_from_file(args.spec)
+        except (GeneratorError, PlutoParseError) as e:
+            print(f"plutopy: gen error\n{e}", file=sys.stderr)
+            return 1
+        if args.output:
+            args.output.write_text(out)
+        else:
+            sys.stdout.write(out)
+        return 0
 
     if args.cmd == "fmt":
         from plutopy.formatter import format_source
