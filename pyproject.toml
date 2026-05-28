@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "plutopy"
+name = "pluto-ecss"
 version = "0.3.0"
 description = "PLUTO (ECSS-E-ST-70-32C) spacecraft-operations DSL to Python transpiler and runtime"
 readme = "README.md"
@@ -36,18 +36,18 @@ highlight = ["pygments>=2.0"]
 docs = ["mkdocs>=1.5", "pygments>=2.0"]
 
 [project.scripts]
-plutopy = "plutopy.cli:main"
+pluto-ecss = "pluto_ecss.cli:main"
 
 [project.entry-points."pygments.lexers"]
-pluto = "plutopy.pygments_lexer:PlutoLexer"
+pluto = "pluto_ecss.pygments_lexer:PlutoLexer"
 
 [project.urls]
-Homepage      = "https://github.com/stzifkas/PLUTOpython"
-Repository    = "https://github.com/stzifkas/PLUTOpython"
-Documentation = "https://stzifkas.github.io/PLUTOpython/"
-Playground    = "https://stzifkas.github.io/PLUTOpython/playground/"
-Issues        = "https://github.com/stzifkas/PLUTOpython/issues"
-Changelog     = "https://github.com/stzifkas/PLUTOpython/releases"
+Homepage      = "https://github.com/stzifkas/pluto-ecss"
+Repository    = "https://github.com/stzifkas/pluto-ecss"
+Documentation = "https://stzifkas.github.io/pluto-ecss/"
+Playground    = "https://stzifkas.github.io/pluto-ecss/playground/"
+Issues        = "https://github.com/stzifkas/pluto-ecss/issues"
+Changelog     = "https://github.com/stzifkas/pluto-ecss/releases"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -56,7 +56,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-plutopy = ["grammar.lark"]
+pluto-ecss = ["grammar.lark"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -6,7 +6,7 @@ import pathlib
 
 import pytest
 
-from plutopy.transpiler import transpile
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -16,7 +16,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(script):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", "run", str(script)],
+        [sys.executable, "-m", "pluto_ecss", "run", str(script)],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 

@@ -1,7 +1,7 @@
 # Example procedure spec. Generate with:
-#   plutopy gen examples/specs/bringup.yaml -o generated.pluto
+#   pluto-ecss gen examples/specs/bringup.yaml -o generated.pluto
 # Then run:
-#   plutopy run generated.pluto
+#   pluto-ecss run generated.pluto
 procedure: BringUp
 
 declare:

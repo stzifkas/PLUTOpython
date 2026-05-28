@@ -43,7 +43,7 @@ from __future__ import annotations
 import pathlib
 from typing import Any, Dict, List, Union
 
-from plutopy.parser import parse as parse_pluto
+from pluto_ecss.parser import parse as parse_pluto
 
 
 INDENT = "  "

@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from plutopy.transpiler import transpile
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -15,7 +15,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -24,7 +24,7 @@ def test_async_emits_async_def_main():
     src = (EXAMPLES / "01_original.pluto").read_text()
     out = transpile(src, runtime="async")
     assert "async def main():" in out
-    assert "from plutopy.async_runtime import" in out
+    assert "from pluto_ecss.async_runtime import" in out
     assert "asyncio.run(main())" in out
     # awaitable calls have `await`
     assert "await initiate_and_confirm" in out
@@ -58,11 +58,11 @@ def test_threaded_default_unchanged():
     out = transpile(src)  # default
     assert "async def" not in out
     assert "asyncio" not in out
-    assert "from plutopy.runtime import" in out
+    assert "from pluto_ecss.runtime import" in out
 
 
 def test_unknown_runtime_raises():
-    from plutopy.transpiler import TranspileError
+    from pluto_ecss.transpiler import TranspileError
     with pytest.raises(TranspileError):
         transpile("procedure main log \"x\" end main end procedure", runtime="bogus")
 
@@ -101,7 +101,7 @@ def test_async_parallel_uses_asyncio_gather_semantically():
     """parallel_until_all on the async runtime should run branches concurrently."""
     import asyncio
     import time
-    from plutopy import async_runtime as ar
+    from pluto_ecss import async_runtime as ar
 
     order = []
 

@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from plutopy.runtime import (
+from pluto_ecss.runtime import (
     Activity,
     Event,
     PlutoRuntimeError,

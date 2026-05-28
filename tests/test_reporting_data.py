@@ -5,8 +5,8 @@ import sys
 
 import pytest
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -16,7 +16,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -48,7 +48,7 @@ def test_transpile_emits_save_context_call():
 
 
 def test_reporting_data_registry_and_resolve():
-    from plutopy.runtime import (
+    from pluto_ecss.runtime import (
         ReportingData, register_reporting_data, resolve_reporting_data,
         _reporting_data,
     )
@@ -60,7 +60,7 @@ def test_reporting_data_registry_and_resolve():
 
 
 def test_save_context_snapshots_value_and_validity():
-    from plutopy.runtime import (
+    from pluto_ecss.runtime import (
         Procedure, ReportingData, register_reporting_data, _reporting_data,
     )
     _reporting_data.clear()
@@ -72,7 +72,7 @@ def test_save_context_snapshots_value_and_validity():
     assert snap.value == 101.3
     assert snap.validity_status == "valid"
     # Mutate the live parameter after the snapshot
-    from plutopy.runtime import resolve_reporting_data
+    from pluto_ecss.runtime import resolve_reporting_data
     live = resolve_reporting_data("Pressure")
     live.value = 999.0
     # Snapshot is unaffected
@@ -80,7 +80,7 @@ def test_save_context_snapshots_value_and_validity():
 
 
 def test_save_context_missing_parameter_is_not_available():
-    from plutopy.runtime import Procedure, _reporting_data
+    from pluto_ecss.runtime import Procedure, _reporting_data
     _reporting_data.clear()
     proc = Procedure()
     proc.save_context([("NoSuchParam", "X")])
@@ -89,7 +89,7 @@ def test_save_context_missing_parameter_is_not_available():
 
 
 def test_resolve_ref_finds_local_snapshot_before_registry():
-    from plutopy.runtime import (
+    from pluto_ecss.runtime import (
         Procedure, ReportingData, register_reporting_data, _reporting_data,
     )
     _reporting_data.clear()
@@ -104,7 +104,7 @@ def test_resolve_ref_finds_local_snapshot_before_registry():
 
 
 def test_get_property_validity_status_of_snapshot():
-    from plutopy.runtime import (
+    from pluto_ecss.runtime import (
         Procedure, ReportingData, register_reporting_data, _reporting_data,
     )
     _reporting_data.clear()
@@ -116,7 +116,7 @@ def test_get_property_validity_status_of_snapshot():
 
 
 def test_get_property_unknown_ref_raises_for_non_status_prop():
-    from plutopy.runtime import Procedure, PlutoRuntimeError, _reporting_data
+    from pluto_ecss.runtime import Procedure, PlutoRuntimeError, _reporting_data
     _reporting_data.clear()
     proc = Procedure()
     with pytest.raises(PlutoRuntimeError):
@@ -126,10 +126,10 @@ def test_get_property_unknown_ref_raises_for_non_status_prop():
 def test_example_runs_end_to_end_with_registered_params():
     """Run the example via subprocess; register params on the fly."""
     bootstrap = (
-        "from plutopy import ReportingData, register_reporting_data;"
+        "from pluto_ecss import ReportingData, register_reporting_data;"
         "register_reporting_data(ReportingData('Temperature', value=22.5, validity_status='valid'));"
         "register_reporting_data(ReportingData('Voltage', value=28.1, validity_status='valid'));"
-        "from plutopy.transpiler import transpile;"
+        "from pluto_ecss.transpiler import transpile;"
         "import pathlib;"
         "src = pathlib.Path('examples/15_save_context.pluto').read_text();"
         "ns = {'__name__': '__demo__'};"
@@ -147,7 +147,7 @@ def test_example_runs_end_to_end_with_registered_params():
 
 
 def test_save_context_round_trips_through_formatter():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = (EXAMPLES / "15_save_context.pluto").read_text()
     formatted = format_source(src)
     assert "save context refer to Temperature of Battery1 by TempBatt1" in formatted
@@ -156,7 +156,7 @@ def test_save_context_round_trips_through_formatter():
 
 
 def test_save_context_serialises_to_json():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = (EXAMPLES / "15_save_context.pluto").read_text()
     d = transpile_to_dict(src)
     sc_stmts = [s for s in d["main"] if s["kind"] == "save_context"]
@@ -167,7 +167,7 @@ def test_save_context_serialises_to_json():
 
 
 def test_async_runtime_has_symmetric_save_context():
-    from plutopy import async_runtime as ar
+    from pluto_ecss import async_runtime as ar
     proc = ar.Procedure()
     ar.register_reporting_data(ar.ReportingData("X", value=7, validity_status="valid"))
     proc.save_context([("X", "X0")])

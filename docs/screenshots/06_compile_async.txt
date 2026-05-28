@@ -1,5 +1,5 @@
 """Transpiled from 01_original.pluto"""
-from plutopy.async_runtime import (
+from pluto_ecss.async_runtime import (
     Procedure,
     Event,
     PlutoAborted,

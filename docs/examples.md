@@ -1,6 +1,6 @@
 # Examples
 
-All examples live in the [`examples/`](https://github.com/stzifkas/PLUTOpython/tree/main/examples) directory and ship as part of the repository.
+All examples live in the [`examples/`](https://github.com/stzifkas/pluto-ecss/tree/main/examples) directory and ship as part of the repository.
 
 ## 1. The original GSoC demo
 
@@ -30,7 +30,7 @@ end procedure
 ```
 
 ```text
-$ plutopy run examples/01_original.pluto
+$ pluto-ecss run examples/01_original.pluto
 [ACTIVITY] Switch on Star Tracker2
 [ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
 [ACTIVITY] Switch on Star Tracker1

@@ -1,9 +1,9 @@
-"""Command-line interface for plutopy.
+"""Command-line interface for pluto_ecss.
 
 Usage:
-    plutopy parse    SCRIPT          # show parse tree
-    plutopy compile  SCRIPT [-o OUT] # emit Python source
-    plutopy run      SCRIPT          # transpile and execute
+    pluto-ecss parse    SCRIPT          # show parse tree
+    pluto-ecss compile  SCRIPT [-o OUT] # emit Python source
+    pluto-ecss run      SCRIPT          # transpile and execute
 """
 from __future__ import annotations
 
@@ -12,14 +12,14 @@ import pathlib
 import sys
 import tempfile
 
-from plutopy import __version__
-from plutopy.parser import parse as parse_pluto, PlutoParseError
-from plutopy.transpiler import transpile
+from pluto_ecss import __version__
+from pluto_ecss.parser import parse as parse_pluto, PlutoParseError
+from pluto_ecss.transpiler import transpile
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="plutopy", description="PLUTO -> Python transpiler")
-    ap.add_argument("--version", action="version", version=f"plutopy {__version__}")
+    ap = argparse.ArgumentParser(prog="pluto-ecss", description="PLUTO -> Python transpiler")
+    ap.add_argument("--version", action="version", version=f"pluto-ecss {__version__}")
     ap.add_argument("-v", "--verbose", action="store_true", help="emit runtime lifecycle logs")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -68,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             tree = parse_pluto(args.script.read_text(), filename=str(args.script))
         except PlutoParseError as e:
-            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            print(f"pluto-ecss: parse error\n{e}", file=sys.stderr)
             return 1
         print(tree.pretty())
         return 0
@@ -76,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "compile":
         try:
             if args.emit == "json":
-                from plutopy.json_emit import transpile_to_json
+                from pluto_ecss.json_emit import transpile_to_json
                 out = transpile_to_json(args.script.read_text(), filename=str(args.script))
                 if not out.endswith("\n"):
                     out += "\n"
@@ -89,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
                     no_runtime=args.no_runtime,
                 )
         except PlutoParseError as e:
-            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            print(f"pluto-ecss: parse error\n{e}", file=sys.stderr)
             return 1
         if args.output:
             args.output.write_text(out)
@@ -98,15 +98,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "demo":
-        from plutopy.demo import run_demo
+        from pluto_ecss.demo import run_demo
         return run_demo(args.script)
 
     if args.cmd == "gen":
-        from plutopy.generator import generate_from_file, GeneratorError
+        from pluto_ecss.generator import generate_from_file, GeneratorError
         try:
             out = generate_from_file(args.spec)
         except (GeneratorError, PlutoParseError) as e:
-            print(f"plutopy: gen error\n{e}", file=sys.stderr)
+            print(f"pluto-ecss: gen error\n{e}", file=sys.stderr)
             return 1
         if args.output:
             args.output.write_text(out)
@@ -115,12 +115,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "fmt":
-        from plutopy.formatter import format_source
+        from pluto_ecss.formatter import format_source
         original = args.script.read_text()
         try:
             formatted = format_source(original, filename=str(args.script))
         except PlutoParseError as e:
-            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            print(f"pluto-ecss: parse error\n{e}", file=sys.stderr)
             return 1
         if args.check:
             return 0 if original == formatted else 1
@@ -139,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
                 style=args.style,
             )
         except PlutoParseError as e:
-            print(f"plutopy: parse error\n{e}", file=sys.stderr)
+            print(f"pluto-ecss: parse error\n{e}", file=sys.stderr)
             return 1
         with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
             tmp.write(py)

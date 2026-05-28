@@ -6,7 +6,7 @@
 // its own value, validity_status, and sampling_time.
 //
 // Before running, register the parameters with the runtime:
-//   from plutopy import ReportingData, register_reporting_data
+//   from pluto_ecss import ReportingData, register_reporting_data
 //   register_reporting_data(ReportingData("Temperature", value=22.5, validity_status="valid"))
 //   register_reporting_data(ReportingData("Voltage",     value=28.1, validity_status="valid"))
 procedure

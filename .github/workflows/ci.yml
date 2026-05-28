@@ -32,6 +32,6 @@ jobs:
 
       - name: Smoke test CLI
         run: |
-          plutopy --version
-          plutopy run examples/01_original.pluto
-          plutopy compile examples/04_events.pluto
+          pluto-ecss --version
+          pluto-ecss run examples/01_original.pluto
+          pluto-ecss compile examples/04_events.pluto

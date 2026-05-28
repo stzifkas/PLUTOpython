@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PLUTOpython playground</title>
+  <title>pluto-ecss playground</title>
   <link rel="icon" href="data:," />
   <style>
     :root {
@@ -133,10 +133,10 @@
 </head>
 <body>
   <header>
-    <h1>🛰 PLUTOpython playground <small>PLUTO → Python, in your browser</small></h1>
+    <h1>🛰 pluto-ecss playground <small>PLUTO → Python, in your browser</small></h1>
     <nav>
       <a href="../">Docs</a>
-      <a href="https://github.com/stzifkas/PLUTOpython" target="_blank">GitHub</a>
+      <a href="https://github.com/stzifkas/pluto-ecss" target="_blank">GitHub</a>
     </nav>
   </header>
 
@@ -214,8 +214,8 @@
 import micropip
 await micropip.install("lark")
 `);
-      setStatus("Installing plutopy…");
-      // Write plutopy source files into a directory we add to sys.path.
+      setStatus("Installing pluto-ecss…");
+      // Write pluto-ecss source files into a directory we add to sys.path.
       const root = "/work";
       ensureDir(pyodide.FS, root);
       for (const [name, content] of Object.entries(window.PLUTOPY_FILES)) {
@@ -227,10 +227,10 @@ await micropip.install("lark")
 import sys
 if "/work" not in sys.path:
     sys.path.insert(0, "/work")
-import plutopy
-from plutopy.parser   import parse as _pluto_parse, PlutoParseError as _PlutoParseError
-from plutopy.transpiler import transpile as _pluto_transpile
-from plutopy.formatter import format_source as _pluto_format
+import pluto_ecss
+from pluto_ecss.parser   import parse as _pluto_parse, PlutoParseError as _PlutoParseError
+from pluto_ecss.transpiler import transpile as _pluto_transpile
+from pluto_ecss.formatter import format_source as _pluto_format
 
 def _run_user(src):
     import io, contextlib, traceback, sys

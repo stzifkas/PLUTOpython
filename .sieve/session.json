@@ -1,13 +1,13 @@
 {
-  "turn": 4,
+  "turn": 5,
   "track_stats": true,
   "test_results": [],
   "seen_errors": [],
   "read_files": {},
   "token_stats": {
-    "total_raw_chars": 4072,
-    "total_compressed_chars": 85,
-    "turns_processed": 4,
+    "total_raw_chars": 6759,
+    "total_compressed_chars": 109,
+    "turns_processed": 5,
     "delta_hits": 0,
     "dedup_hits": 0
   }

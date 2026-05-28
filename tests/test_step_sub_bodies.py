@@ -7,8 +7,8 @@ import pathlib
 import subprocess
 import sys
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -18,7 +18,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -135,7 +135,7 @@ def test_full_step_lifecycle_runs_under_async_runtime():
 
 
 def test_step_sub_bodies_round_trip_via_formatter():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = (EXAMPLES / "14_step_sub_bodies.pluto").read_text()
     formatted = format_source(src)
     # All four step sections present
@@ -148,7 +148,7 @@ def test_step_sub_bodies_round_trip_via_formatter():
 
 
 def test_step_sub_bodies_serialise_to_json():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = (EXAMPLES / "14_step_sub_bodies.pluto").read_text()
     d = transpile_to_dict(src)
     step = d["main"][1]  # main[0] is the counter assign

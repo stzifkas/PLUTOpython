@@ -1,6 +1,6 @@
 """asyncio-flavoured runtime for transpiled PLUTO procedures.
 
-Symmetric to plutopy.runtime, but:
+Symmetric to pluto_ecss.runtime, but:
   - `initiate_and_confirm`, `parallel_until_all/one`, `wait_for_event`,
     `wait_until`, and `Procedure.raise_event` are coroutines.
   - Events wrap `asyncio.Event` so waits are non-busy.
@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
-log = logging.getLogger("plutopy")
+log = logging.getLogger("pluto-ecss")
 
 
 class PlutoRuntimeError(RuntimeError):

@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-from plutopy.parser import parse
+from pluto_ecss.parser import parse
 
 
 EXAMPLES = sorted(pathlib.Path(__file__).parent.parent.joinpath("examples").glob("*.pluto"))

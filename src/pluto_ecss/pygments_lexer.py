@@ -1,7 +1,7 @@
 """Pygments lexer for the PLUTO DSL.
 
 Registered as an entry point in pyproject.toml under
-`pygments.lexers` as `plutopy.pygments_lexer:PlutoLexer`, so once the
+`pygments.lexers` as `pluto_ecss.pygments_lexer:PlutoLexer`, so once the
 package is installed you can write::
 
     pygmentize -l pluto examples/01_original.pluto
@@ -50,7 +50,7 @@ class PlutoLexer(RegexLexer):
     """Pygments lexer for PLUTO procedures."""
 
     name = "PLUTO"
-    aliases = ["pluto", "plutopy"]
+    aliases = ["pluto", "pluto-ecss"]
     filenames = ["*.pluto"]
     mimetypes = ["text/x-pluto"]
 

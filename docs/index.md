@@ -1,4 +1,4 @@
-# PLUTOpython
+# pluto-ecss
 
 A PLUTO ([ECSS-E-ST-70-32C](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/)) to Python transpiler and runtime.
 
@@ -28,8 +28,8 @@ end procedure
 ```
 
 ```bash
-$ pip install plutopy
-$ plutopy run script.pluto
+$ pip install pluto-ecss
+$ pluto-ecss run script.pluto
 [ACTIVITY] Switch on Star Tracker2
 [ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
 [ACTIVITY] Switch on Star Tracker1
@@ -38,9 +38,9 @@ $ plutopy run script.pluto
 ## Highlights
 
 - **Real transpiler, not a tree-walker.** PLUTO → readable Python source that imports a small runtime library.
-- **Live TUI demo.** `plutopy demo` visualises a fake satellite reacting to your procedure in real time.
+- **Live TUI demo.** `pluto-ecss demo` visualises a fake satellite reacting to your procedure in real time.
 - **Friendly errors.** Parse failures show source line, column, and a caret with a structural hint.
-- **Modern Python packaging.** `pip install plutopy`, console script, GitHub Actions matrix on 3.9 / 3.11 / 3.13.
+- **Modern Python packaging.** `pip install pluto-ecss`, console script, GitHub Actions matrix on 3.9 / 3.11 / 3.13.
 - **Pygments syntax highlighter.** `pygmentize -l pluto …` (and these very docs use it).
 
 ## Continue reading

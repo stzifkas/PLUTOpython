@@ -43,7 +43,7 @@ from typing import Any, Dict, List
 
 from lark import Token, Tree
 
-from plutopy.parser import parse as parse_pluto
+from pluto_ecss.parser import parse as parse_pluto
 
 
 def transpile_to_json(source: str, *, indent: int | None = 2, filename: str | None = None) -> str:

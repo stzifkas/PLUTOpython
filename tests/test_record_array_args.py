@@ -5,8 +5,8 @@ import sys
 
 import pytest
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -16,7 +16,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -78,7 +78,7 @@ def test_simple_args_still_work_unchanged():
 
 def test_runtime_receives_record_and_array():
     """Handler captures whatever arguments are passed; assert shape."""
-    from plutopy.runtime import Activity, register_activity
+    from pluto_ecss.runtime import Activity, register_activity
 
     received: dict = {}
 
@@ -119,7 +119,7 @@ def test_example_runs_in_async():
 
 
 def test_record_array_round_trip_via_formatter():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = (EXAMPLES / "16_record_array_args.pluto").read_text()
     formatted = format_source(src)
     assert "Telecommand record" in formatted
@@ -130,7 +130,7 @@ def test_record_array_round_trip_via_formatter():
 
 
 def test_record_array_json_serialisation():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = (EXAMPLES / "16_record_array_args.pluto").read_text()
     d = transpile_to_dict(src)
     args = d["main"][0]["call"]["arguments"]

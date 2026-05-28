@@ -38,12 +38,12 @@ def test_bundle_in_sync_with_source():
 def test_bundle_contains_required_modules():
     files = _load_bundle()
     required = {
-        "plutopy/__init__.py",
-        "plutopy/grammar.lark",
-        "plutopy/parser.py",
-        "plutopy/transpiler.py",
-        "plutopy/runtime.py",
-        "plutopy/formatter.py",
+        "pluto_ecss/__init__.py",
+        "pluto_ecss/grammar.lark",
+        "pluto_ecss/parser.py",
+        "pluto_ecss/transpiler.py",
+        "pluto_ecss/runtime.py",
+        "pluto_ecss/formatter.py",
     }
     missing = required - set(files.keys())
     assert not missing, f"playground bundle missing files: {missing}"
@@ -51,10 +51,10 @@ def test_bundle_contains_required_modules():
 
 def test_bundled_modules_match_source():
     files = _load_bundle()
-    src = ROOT / "src" / "plutopy"
+    src = ROOT / "src" / "pluto_ecss"
     for rel, content in files.items():
-        # rel looks like "plutopy/parser.py"
-        path = src / rel[len("plutopy/"):]
+        # rel looks like "pluto_ecss/parser.py"
+        path = src / rel[len("pluto_ecss/"):]
         assert path.read_text() == content, f"playground stale for {rel}"
 
 

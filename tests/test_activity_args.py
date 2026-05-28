@@ -5,8 +5,8 @@ import sys
 
 import pytest
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -16,7 +16,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -65,7 +65,7 @@ def test_transpile_no_args_keeps_call_compact():
 
 def test_arguments_propagate_to_handler_at_runtime():
     """Register a custom Activity that captures arguments; assert it receives them."""
-    from plutopy.runtime import Activity, register_activity
+    from pluto_ecss.runtime import Activity, register_activity
 
     received: dict = {}
 
@@ -104,7 +104,7 @@ def test_async_example_runs_with_args():
 
 
 def test_with_clause_round_trips_through_formatter():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = (EXAMPLES / "12_activity_args.pluto").read_text()
     formatted = format_source(src)
     assert "with Mode := " in formatted
@@ -113,7 +113,7 @@ def test_with_clause_round_trips_through_formatter():
 
 
 def test_with_clause_serialises_to_json():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = (EXAMPLES / "12_activity_args.pluto").read_text()
     d = transpile_to_dict(src)
     first_call = d["main"][0]["call"]

@@ -5,8 +5,8 @@ import sys
 
 import pytest
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -16,7 +16,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -164,7 +164,7 @@ def test_cli_runs_spec_example():
 def test_abort_action_propagates():
     """An immediate `abort` after a successful activity is silenced
     (the activity confirmed) — but if the activity raises, abort fires."""
-    from plutopy.runtime import (
+    from pluto_ecss.runtime import (
         Activity, PlutoAborted, register_activity,
         Procedure, switch_on, initiate_and_confirm,
     )

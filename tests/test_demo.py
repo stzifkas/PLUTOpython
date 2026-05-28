@@ -5,7 +5,7 @@ import pytest
 
 rich = pytest.importorskip("rich")
 
-from plutopy.demo import DashboardState, _render
+from pluto_ecss.demo import DashboardState, _render
 
 
 def test_dashboard_state_mutations():
@@ -29,8 +29,8 @@ def test_render_returns_group():
 
 
 def test_demo_runs_to_completion(tmp_path):
-    """Run plutopy.demo.run_demo on the original script; assert it returns 0."""
-    from plutopy.demo import run_demo
+    """Run pluto_ecss.demo.run_demo on the original script; assert it returns 0."""
+    from pluto_ecss.demo import run_demo
     script = pathlib.Path(__file__).parent.parent / "examples" / "01_original.pluto"
     rc = run_demo(script)
     assert rc == 0

@@ -1,8 +1,8 @@
 """Live TUI demo: visualises a fake satellite reacting to a PLUTO procedure.
 
 Run with:
-    plutopy demo                   # uses examples/05_full_bringup.pluto
-    plutopy demo path/to/script.pluto
+    pluto-ecss demo                   # uses examples/05_full_bringup.pluto
+    pluto-ecss demo path/to/script.pluto
 """
 from __future__ import annotations
 
@@ -12,9 +12,9 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from plutopy import runtime
-from plutopy.runtime import Activity, register_activity
-from plutopy.transpiler import transpile
+from pluto_ecss import runtime
+from pluto_ecss.runtime import Activity, register_activity
+from pluto_ecss.transpiler import transpile
 
 try:
     from rich.console import Group
@@ -25,7 +25,7 @@ try:
 except ImportError as e:  # pragma: no cover
     raise SystemExit(
         "The `demo` command requires the 'rich' package.\n"
-        "Install it with: pip install plutopy[tui]   (or: pip install rich)"
+        "Install it with: pip install pluto-ecss[tui]   (or: pip install rich)"
     ) from e
 
 

@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-from plutopy.transpiler import transpile
+from pluto_ecss.transpiler import transpile
 
 
 EXAMPLES = sorted(pathlib.Path(__file__).parent.parent.joinpath("examples").glob("*.pluto"))
@@ -12,7 +12,7 @@ EXAMPLES = sorted(pathlib.Path(__file__).parent.parent.joinpath("examples").glob
 def test_examples_compile(path):
     out = transpile(path.read_text())
     assert "def main():" in out
-    assert "from plutopy.runtime import" in out
+    assert "from pluto_ecss.runtime import" in out
     # the transpiled source must be valid Python
     compile(out, str(path), "exec")
 

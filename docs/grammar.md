@@ -1,7 +1,7 @@
 # Grammar reference
 
 Every PLUTO construct currently supported by the transpiler. The full
-formal grammar lives in [`src/plutopy/grammar.lark`](https://github.com/stzifkas/PLUTOpython/blob/main/src/plutopy/grammar.lark).
+formal grammar lives in [`src/pluto_ecss/grammar.lark`](https://github.com/stzifkas/pluto-ecss/blob/main/src/pluto_ecss/grammar.lark).
 
 ## Procedure structure
 
@@ -131,7 +131,7 @@ runs synchronously before execution continues.
 ## Output
 
 ```pluto
-log "message"             // routed to the Python logger (visible with plutopy -v)
+log "message"             // routed to the Python logger (visible with pluto-ecss -v)
 inform user "message"     // printed to stdout
 ```
 

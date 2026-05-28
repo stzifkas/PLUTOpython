@@ -8,7 +8,7 @@ Paste into dev.to and add:
 
 # I finally finished my GSoC 2019 project, seven years later
 
-Back in **2019**, as part of a [Google Summer of Code proposal](https://github.com/stzifkas/PLUTOpython/tree/v0.1-gsoc-2019), I started building an open-source parser for **PLUTO** — the procedure language [standardised by ECSS](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/) (`ECSS-E-ST-70-32C`) for spacecraft operations. PLUTO is the DSL ground operators write to bring up a star tracker, run a parallel safety sequence, or react to a satellite-on-orbit event.
+Back in **2019**, as part of a [Google Summer of Code proposal](https://github.com/stzifkas/pluto-ecss/tree/v0.1-gsoc-2019), I started building an open-source parser for **PLUTO** — the procedure language [standardised by ECSS](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/) (`ECSS-E-ST-70-32C`) for spacecraft operations. PLUTO is the DSL ground operators write to bring up a star tracker, run a parallel safety sequence, or react to a satellite-on-orbit event.
 
 My proposal sample built a parse tree from one hard-coded script and "ran" it by walking the tree. It was a proof-of-concept I never grew past one example file. Then life happened, and it sat dormant for seven years.
 
@@ -16,10 +16,10 @@ When the **GitHub Finish-Up-A-Thon** showed up, this was the obvious candidate. 
 
 ## Before — the GSoC 2019 snapshot
 
-Branch [`legacy/gsoc-2019`](https://github.com/stzifkas/PLUTOpython/tree/legacy/gsoc-2019), tag [`v0.1-gsoc-2019`](https://github.com/stzifkas/PLUTOpython/releases/tag/v0.1-gsoc-2019). Five files, ~30 lines of grammar, no tests, no CLI, several straight-up bugs:
+Branch [`legacy/gsoc-2019`](https://github.com/stzifkas/pluto-ecss/tree/legacy/gsoc-2019), tag [`v0.1-gsoc-2019`](https://github.com/stzifkas/pluto-ecss/releases/tag/v0.1-gsoc-2019). Five files, ~30 lines of grammar, no tests, no CLI, several straight-up bugs:
 
 ```python
-# plutopy.py (2019) — a few real lines from the original
+# pluto_ecss.py (2019) — a few real lines from the original
 class WatchdogSymbol(Symbol):
     def __init__(self,name,events,step=None):
         self.name = name
@@ -63,9 +63,9 @@ That ran end-to-end. Anything else was a parse error or a `NameError` because of
 Same script, same syntax — but now it transpiles to readable Python:
 
 ```text
-$ plutopy compile examples/01_original.pluto
+$ pluto-ecss compile examples/01_original.pluto
 """Transpiled from 01_original.pluto"""
-from plutopy.runtime import (
+from pluto_ecss.runtime import (
     Procedure, Event, PlutoAborted, PlutoTerminated,
     switch_on, switch_off,
     initiate, initiate_and_confirm, initiate_and_confirm_step,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 And it actually executes:
 
 ```text
-$ plutopy run examples/01_original.pluto
+$ pluto-ecss run examples/01_original.pluto
 [ACTIVITY] Switch on Star Tracker2
 [ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
 [ACTIVITY] Switch on Star Tracker1
@@ -120,7 +120,7 @@ Plus the everyday language stuff: `if/else`, `case/when/otherwise`, `while`, `fo
 
 ## A live TUI demo of the runtime
 
-`plutopy demo SCRIPT` runs a transpiled procedure against a Rich-based dashboard that lights up as activities execute:
+`pluto-ecss demo SCRIPT` runs a transpiled procedure against a Rich-based dashboard that lights up as activities execute:
 
 ```text
 ╭──────────────────── Procedure: 01_original.pluto ─────────────────────╮
@@ -150,7 +150,7 @@ The transpiler isn't one-size-fits-all. Modern mission-control stacks are asynci
 - `--runtime async` → emits `async def main()` against an asyncio runtime with `asyncio.gather` for parallel sections.
 - `--style class` → emits a `class TranspiledProcedure(Procedure)` with declarations in `__init__` and main body as `run()`.
 - `--emit json` → skips Python entirely, emits a structured JSON description of the procedure for tooling integration.
-- `--no-runtime` → inlines the runtime so the output is a single self-contained `.py` with no `plutopy` dependency.
+- `--no-runtime` → inlines the runtime so the output is a single self-contained `.py` with no `pluto-ecss` dependency.
 
 All four compose. `--style class --runtime async` works.
 
@@ -159,8 +159,8 @@ All four compose. `--style class --runtime async` works.
 The 2019 version raised raw Lark exceptions. The new version catches them and explains:
 
 ```text
-$ plutopy parse bad.pluto
-plutopy: parse error
+$ pluto-ecss parse bad.pluto
+pluto-ecss: parse error
 at bad.pluto:4:7: cannot start a token with 'l'; expected 'and', 'or', 'then', or one of 2 more
 
      4 |       log "hi"
@@ -192,10 +192,10 @@ The interesting thing about doing this with AI tooling at hand is that it remove
 
 ## Try it
 
-- **[Repo](https://github.com/stzifkas/PLUTOpython)** — `main` is the after, `legacy/gsoc-2019` is the before
-- **[Docs](https://stzifkas.github.io/PLUTOpython/)** — quickstart, grammar reference, architecture
-- **[Playground](https://stzifkas.github.io/PLUTOpython/playground/)** — write PLUTO and run it in the browser; no install
-- `pip install -e .` → `plutopy run examples/05_full_bringup.pluto`
+- **[Repo](https://github.com/stzifkas/pluto-ecss)** — `main` is the after, `legacy/gsoc-2019` is the before
+- **[Docs](https://stzifkas.github.io/pluto-ecss/)** — quickstart, grammar reference, architecture
+- **[Playground](https://stzifkas.github.io/pluto-ecss/playground/)** — write PLUTO and run it in the browser; no install
+- `pip install -e .` → `pluto-ecss run examples/05_full_bringup.pluto`
 
 The completion arc is real. Seven years of dormancy, eleven days of focused finishing, and what was a "sample for a proposal" is now an installable transpiler with a real test suite, a CLI, an asyncio runtime, a docs site, and a browser playground.
 

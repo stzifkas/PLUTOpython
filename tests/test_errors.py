@@ -1,7 +1,7 @@
 """Tests for friendly parse errors."""
 import pytest
 
-from plutopy.parser import PlutoParseError, parse
+from pluto_ecss.parser import PlutoParseError, parse
 
 
 def test_missing_then_in_if():

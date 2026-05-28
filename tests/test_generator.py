@@ -5,12 +5,12 @@ import sys
 
 import pytest
 
-from plutopy.generator import (
+from pluto_ecss.generator import (
     GeneratorError,
     generate_from_spec,
     generate_from_yaml,
 )
-from plutopy.parser import parse
+from pluto_ecss.parser import parse
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -158,7 +158,7 @@ def test_cli_gen_to_file(tmp_path):
     out = tmp_path / "out.pluto"
     env = {"PYTHONPATH": str(ROOT / "src")}
     r = subprocess.run(
-        [sys.executable, "-m", "plutopy", "gen", str(spec), "-o", str(out)],
+        [sys.executable, "-m", "pluto_ecss", "gen", str(spec), "-o", str(out)],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
     assert r.returncode == 0, r.stderr
@@ -176,7 +176,7 @@ def test_example_spec_generates_and_runs():
         tmp.write_text(out)
         env = {"PYTHONPATH": str(ROOT / "src")}
         r = subprocess.run(
-            [sys.executable, "-m", "plutopy", "run", str(tmp)],
+            [sys.executable, "-m", "pluto_ecss", "run", str(tmp)],
             env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
         )
         assert r.returncode == 0, r.stderr

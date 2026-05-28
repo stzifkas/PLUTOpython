@@ -14,7 +14,7 @@ from typing import List
 
 from lark import Token, Tree
 
-from plutopy.parser import parse as parse_pluto
+from pluto_ecss.parser import parse as parse_pluto
 
 
 INDENT = "  "

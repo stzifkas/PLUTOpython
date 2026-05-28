@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
-log = logging.getLogger("plutopy")
+log = logging.getLogger("pluto-ecss")
 
 
 class PlutoRuntimeError(RuntimeError):

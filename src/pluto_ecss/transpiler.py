@@ -1,6 +1,6 @@
 """PLUTO parse tree -> Python source code.
 
-Emits a self-contained .py file that imports from `plutopy.runtime` and
+Emits a self-contained .py file that imports from `pluto_ecss.runtime` and
 defines a `main()` function. The transpiled module is human-readable.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ from typing import List
 
 from lark import Token, Tree
 
-from plutopy.parser import parse as parse_pluto
+from pluto_ecss.parser import parse as parse_pluto
 
 _RUNTIME_DIR = pathlib.Path(__file__).parent
 
@@ -38,8 +38,8 @@ def transpile(
     """Transpile a PLUTO source string into runnable Python source.
 
     `runtime`:
-      - "threaded" (default): emits against `plutopy.runtime`, threads-based.
-      - "async": emits against `plutopy.async_runtime`, asyncio-based.
+      - "threaded" (default): emits against `pluto_ecss.runtime`, threads-based.
+      - "async": emits against `pluto_ecss.async_runtime`, asyncio-based.
 
     `style`:
       - "functions" (default): emits `def main():` (or `async def main():`).
@@ -47,10 +47,10 @@ def transpile(
         declarations in `__init__` and main body in `run()`.
 
     `no_runtime`:
-      - False (default): the output `import`s from `plutopy.runtime` (or
-        `plutopy.async_runtime`).
+      - False (default): the output `import`s from `pluto_ecss.runtime` (or
+        `pluto_ecss.async_runtime`).
       - True: inlines the runtime source so the output is a single
-        self-contained .py file with no `plutopy` dependency.
+        self-contained .py file with no `pluto-ecss` dependency.
     """
     if runtime not in VALID_RUNTIMES:
         raise TranspileError(f"unknown runtime: {runtime!r}; expected one of {VALID_RUNTIMES}")
@@ -81,12 +81,12 @@ def _module_header(doc: str | None, *, runtime: str, no_runtime: bool = False) -
         runtime_src = (_RUNTIME_DIR / runtime_file).read_text()
         return (
             doc_str
-            + "# --- inlined plutopy runtime (--no-runtime) ---\n"
+            + "# --- inlined pluto-ecss runtime (--no-runtime) ---\n"
             + "# This file is self-contained. Edit at your own risk.\n"
             + runtime_src.rstrip()
             + "\n# --- end inlined runtime ---\n\n\n"
         )
-    module = "plutopy.async_runtime" if runtime == "async" else "plutopy.runtime"
+    module = "pluto_ecss.async_runtime" if runtime == "async" else "pluto_ecss.runtime"
     import_list = ",\n    ".join(_RUNTIME_PUBLIC_NAMES)
     return (
         doc_str

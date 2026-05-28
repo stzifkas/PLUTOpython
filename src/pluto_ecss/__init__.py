@@ -1,8 +1,8 @@
-"""PLUTOpython: a PLUTO (ECSS-E-ST-70-32C) to Python transpiler and runtime."""
+"""pluto-ecss: a PLUTO (ECSS-E-ST-70-32C) to Python transpiler and runtime."""
 
 __version__ = "0.3.0"
 
-from plutopy.runtime import (
+from pluto_ecss.runtime import (
     Procedure,
     Event,
     SystemElement,

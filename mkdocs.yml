@@ -1,8 +1,8 @@
-site_name: PLUTOpython
+site_name: pluto-ecss
 site_description: A PLUTO (ECSS-E-ST-70-31C) to Python transpiler and runtime.
-site_url: https://stzifkas.github.io/PLUTOpython/
-repo_url: https://github.com/stzifkas/PLUTOpython
-repo_name: stzifkas/PLUTOpython
+site_url: https://stzifkas.github.io/pluto-ecss/
+repo_url: https://github.com/stzifkas/pluto-ecss
+repo_name: stzifkas/pluto-ecss
 edit_uri: edit/main/docs/
 
 theme:

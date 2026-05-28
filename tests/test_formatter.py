@@ -5,8 +5,8 @@ import sys
 
 import pytest
 
-from plutopy.formatter import format_source
-from plutopy.parser import parse
+from pluto_ecss.formatter import format_source
+from pluto_ecss.parser import parse
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -74,7 +74,7 @@ def test_cli_fmt_check_passes_on_canonical():
     try:
         tmp.write_text(formatted)
         result = subprocess.run(
-            [sys.executable, "-m", "plutopy", "fmt", "--check", str(tmp)],
+            [sys.executable, "-m", "pluto_ecss", "fmt", "--check", str(tmp)],
             env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
         )
         assert result.returncode == 0
@@ -86,7 +86,7 @@ def test_cli_fmt_check_fails_on_non_canonical():
     env = {"PYTHONPATH": str(ROOT / "src")}
     src_path = ROOT / "examples" / "01_original.pluto"
     result = subprocess.run(
-        [sys.executable, "-m", "plutopy", "fmt", "--check", str(src_path)],
+        [sys.executable, "-m", "pluto_ecss", "fmt", "--check", str(src_path)],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
     # original uses 4-space indentation; canonical is 2 → should not match

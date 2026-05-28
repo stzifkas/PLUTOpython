@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).parent.parent
 def _run_cli(args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env,
         capture_output=True,
         text=True,

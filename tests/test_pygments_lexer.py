@@ -7,7 +7,7 @@ from pygments import highlight
 from pygments.formatters import RawTokenFormatter
 from pygments.token import Keyword, Name
 
-from plutopy.pygments_lexer import PlutoLexer
+from pluto_ecss.pygments_lexer import PlutoLexer
 
 
 def test_keywords_are_tokenised_as_keywords():

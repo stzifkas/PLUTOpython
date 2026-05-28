@@ -3,8 +3,8 @@ import pathlib
 import subprocess
 import sys
 
-from plutopy.parser import parse
-from plutopy.transpiler import transpile
+from pluto_ecss.parser import parse
+from pluto_ecss.transpiler import transpile
 
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -14,7 +14,7 @@ EXAMPLES = ROOT / "examples"
 def _run_cli(*args):
     env = {"PYTHONPATH": str(ROOT / "src")}
     return subprocess.run(
-        [sys.executable, "-m", "plutopy", *args],
+        [sys.executable, "-m", "pluto_ecss", *args],
         env=env, capture_output=True, text=True, cwd=str(ROOT), check=False,
     )
 
@@ -58,7 +58,7 @@ def test_refer_by_works_in_async_runtime():
 
 
 def test_refer_by_round_trips_through_formatter():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = (EXAMPLES / "11_refer_by.pluto").read_text()
     formatted = format_source(src)
     assert "refer by TRACKER1_BOOT" in formatted
@@ -67,7 +67,7 @@ def test_refer_by_round_trips_through_formatter():
 
 
 def test_refer_by_serialises_to_json():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = (EXAMPLES / "11_refer_by.pluto").read_text()
     d = transpile_to_dict(src)
     initiate_stmts = [s for s in d["main"] if s["kind"] == "initiate"]
@@ -123,7 +123,7 @@ def test_refer_by_on_confirm_queryable_at_runtime():
 
 
 def test_refer_by_on_confirm_formatter_round_trip():
-    from plutopy.formatter import format_source
+    from pluto_ecss.formatter import format_source
     src = """
     procedure main
       initiate and confirm Switch on X refer by RUN1
@@ -135,7 +135,7 @@ def test_refer_by_on_confirm_formatter_round_trip():
 
 
 def test_refer_by_on_confirm_json_serialisation():
-    from plutopy.json_emit import transpile_to_dict
+    from pluto_ecss.json_emit import transpile_to_dict
     src = "procedure main initiate and confirm Switch on X refer by RUN1 end main end procedure"
     d = transpile_to_dict(src)
     ic = d["main"][0]

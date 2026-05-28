@@ -5,36 +5,36 @@
            │
            ▼
   ┌────────────────────┐
-  │ plutopy.parser     │  Lark Earley parser, grammar.lark
+  │ pluto_ecss.parser     │  Lark Earley parser, grammar.lark
   └────────────────────┘
            │ Tree
            ▼
   ┌────────────────────┐
-  │ plutopy.transpiler │  Tree walker, emits readable Python source
+  │ pluto_ecss.transpiler │  Tree walker, emits readable Python source
   └────────────────────┘
            │ Python source string
            ▼
   ┌────────────────────┐
-  │ plutopy.runtime    │  Procedure, Event, parallel_*, switch_on/off, …
+  │ pluto_ecss.runtime    │  Procedure, Event, parallel_*, switch_on/off, …
   └────────────────────┘
 ```
 
 ## Modules
 
-### `plutopy.grammar` (`grammar.lark`)
+### `pluto_ecss.grammar` (`grammar.lark`)
 
 The grammar file is parsed with [Lark](https://github.com/lark-parser/lark)'s Earley algorithm.
 Earley handles the PLUTO ambiguity around multi-word identifiers (`Star Tracker2`, `Reaction Wheel3 of AOC of Satellite`). The `WORD` terminal is declared with priority `-10` so string-literal keywords always win the tokenisation race.
 
-### `plutopy.parser`
+### `pluto_ecss.parser`
 
 A thin wrapper around the cached Lark parser. Adds friendly error wrapping: parse failures raise `PlutoParseError` with source line/column, a caret marker, and a structural hint.
 
-### `plutopy.transpiler`
+### `pluto_ecss.transpiler`
 
 A `_Emitter` class with one `_stmt_<rulename>` method per statement kind. Every method returns a list of Python source lines; the caller indents them as it splices them into the surrounding block. The output is plain Python — no eval-of-strings, no DSL trickery.
 
-### `plutopy.runtime`
+### `pluto_ecss.runtime`
 
 The standard library the transpiled output calls into:
 
@@ -47,14 +47,14 @@ The standard library the transpiled output calls into:
 - `wait_for_event(proc, name, timeout=None)` / `wait_until(predicate, timeout=None)`.
 - `inform_user(...)` / `pluto_log(...)`.
 
-### `plutopy.cli`
+### `pluto_ecss.cli`
 
 `argparse` front-end exposing `parse / compile / run / demo` subcommands. `-v` enables Python logging at INFO level so you can watch the procedure lifecycle.
 
-### `plutopy.demo`
+### `pluto_ecss.demo`
 
 Rich-based live dashboard. Registers custom activity handlers that mutate a `DashboardState`, monkey-patches `Procedure.start/finish/raise_event/declare_event` to broadcast lifecycle events, and runs the procedure in a thread while the main thread refreshes a `rich.Live` group.
 
-### `plutopy.pygments_lexer`
+### `pluto_ecss.pygments_lexer`
 
 A `RegexLexer` registered as a Pygments entry point named `pluto`, so any tool that uses Pygments (mkdocs, GitHub, Jupyter, etc.) can highlight `.pluto` code.
