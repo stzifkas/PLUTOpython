@@ -1,0 +1,2 @@
+[ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
+[INFORM] Gyro converter is up

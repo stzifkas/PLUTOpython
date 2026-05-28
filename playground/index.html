@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pluto-ecss playground</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #16202a;
+      --border: #2a3a4a;
+      --fg: #e1e7ee;
+      --muted: #8aa0b8;
+      --accent: #5aa6ff;
+      --ok: #6bd97c;
+      --warn: #ffc857;
+      --err: #ff7575;
+      --mono: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+    header h1 small { color: var(--muted); font-weight: 400; margin-left: 8px; }
+    header nav a { color: var(--accent); text-decoration: none; margin-left: 14px; }
+    header nav a:hover { text-decoration: underline; }
+    .toolbar {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 18px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .toolbar button {
+      background: var(--bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .toolbar button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .toolbar button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .toolbar select {
+      background: var(--bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      border-radius: 6px;
+      font: inherit;
+    }
+    .toolbar .status {
+      margin-left: auto;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .toolbar .status.ok    { color: var(--ok);   }
+    .toolbar .status.warn  { color: var(--warn); }
+    .toolbar .status.err   { color: var(--err);  }
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+    .pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-right: 1px solid var(--border);
+    }
+    .pane:last-child { border-right: none; }
+    .pane h2 {
+      margin: 0;
+      padding: 8px 14px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+    .pane .tabs { display: flex; gap: 4px; padding: 6px 10px 0; background: var(--panel); border-bottom: 1px solid var(--border); }
+    .pane .tabs button {
+      background: transparent; border: none; color: var(--muted); padding: 6px 10px;
+      cursor: pointer; border-bottom: 2px solid transparent; font: inherit;
+    }
+    .pane .tabs button.active { color: var(--fg); border-bottom-color: var(--accent); }
+    textarea, pre {
+      flex: 1;
+      margin: 0;
+      padding: 14px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.5;
+      border: none;
+      outline: none;
+      resize: none;
+      overflow: auto;
+      tab-size: 2;
+      white-space: pre;
+    }
+    pre { white-space: pre-wrap; word-break: break-word; }
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      .pane { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🛰 pluto-ecss playground <small>PLUTO → Python, in your browser</small></h1>
+    <nav>
+      <a href="../">Docs</a>
+      <a href="https://github.com/stzifkas/pluto-ecss" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="toolbar">
+    <select id="example">
+      <option value="01">01 — original GSoC demo</option>
+      <option value="02">02 — assignment &amp; log</option>
+      <option value="03">03 — loops</option>
+      <option value="04">04 — events</option>
+      <option value="06">06 — if / else</option>
+      <option value="07">07 — case</option>
+      <option value="08">08 — watchdog</option>
+    </select>
+    <button id="btn-parse"   disabled>Parse tree</button>
+    <button id="btn-compile" disabled>Compile</button>
+    <button id="btn-run"     disabled>Run</button>
+    <button id="btn-format"  disabled>Format</button>
+    <span class="status" id="status">Loading Pyodide…</span>
+  </div>
+
+  <main>
+    <section class="pane">
+      <h2>PLUTO source</h2>
+      <textarea id="source" spellcheck="false" autocomplete="off"></textarea>
+    </section>
+    <section class="pane">
+      <div class="tabs">
+        <button data-tab="output" class="active">Output</button>
+        <button data-tab="python">Python</button>
+        <button data-tab="tree">Parse tree</button>
+      </div>
+      <pre id="out-output"></pre>
+      <pre id="out-python" hidden></pre>
+      <pre id="out-tree"   hidden></pre>
+    </section>
+  </main>
+
+  <script src="files.js"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script>
+    const EXAMPLES = {
+      "01": `// The original GSoC 2019 demo script.\nprocedure\n  declare\n    event chaos described by Total disaster, event chaos2\n  end declare\n  main\n    initiate Switch on Star Tracker2\n    in parallel until all complete\n      initiate and confirm step SWITCH ON SECOND STAR TRACKER\n        main\n          initiate and confirm Switch on Reaction Wheel3 of AOC of Satellite;\n        end main\n      end step;\n      initiate and confirm step SWITCH ON FIRST STAR TRACKER\n        main\n          initiate and confirm Switch on Star Tracker1;\n        end main\n      end step;\n    end parallel\n  end main\nend procedure\n`,
+      "02": `procedure\n  main\n    threshold := 42\n    observed := 40\n    log "before observation"\n    inform user "threshold set to 42"\n    if observed < threshold then\n      inform user "all clear"\n    end if\n  end main\nend procedure\n`,
+      "03": `procedure\n  main\n    counter := 0\n    while counter < 3 do\n      log "loop"\n      counter := counter + 1\n    end while\n    for i := 1 to 3 do\n      log "tick"\n    end for\n    inform user "loops finished"\n  end main\nend procedure\n`,
+      "04": `procedure\n  declare\n    event ready described by System bring up complete\n  end declare\n  main\n    raise event ready\n    wait for event ready\n    initiate and confirm Switch on Star Tracker1\n  end main\nend procedure\n`,
+      "06": `procedure\n  main\n    mode := 2\n    if mode = 1 then\n      inform user "nominal"\n      initiate and confirm Switch on Star Tracker1\n    else\n      inform user "safe"\n      initiate and confirm Switch off Reaction Wheel3\n    end if\n  end main\nend procedure\n`,
+      "07": `procedure\n  main\n    mode := 2\n    case mode of\n      when 1 do inform user "STANDBY"\n      when 2 do inform user "NOMINAL"\n      when 3 do inform user "SAFE"\n      otherwise inform user "UNKNOWN"\n    end case\n  end main\nend procedure\n`,
+      "08": `procedure\n  declare\n    event boom described by Critical failure\n  end declare\n  watchdog\n    on boom do\n      inform user "watchdog handling boom"\n      initiate and confirm Switch off Reaction Wheel3\n    end on\n  end watchdog\n  main\n    initiate and confirm Switch on Reaction Wheel3\n    raise event boom\n  end main\nend procedure\n`,
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const setStatus = (text, kind = "") => {
+      const el = $("status");
+      el.textContent = text;
+      el.className = "status " + kind;
+    };
+
+    function ensureDir(fs, dir) {
+      const parts = dir.split("/").filter(Boolean);
+      let cur = "";
+      for (const p of parts) {
+        cur += "/" + p;
+        try { fs.mkdir(cur); } catch (e) { /* exists */ }
+      }
+    }
+
+    let pyodide = null;
+
+    async function boot() {
+      setStatus("Loading Pyodide…");
+      pyodide = await loadPyodide();
+      setStatus("Installing lark…");
+      await pyodide.loadPackage("micropip");
+      await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("lark")
+`);
+      setStatus("Installing pluto-ecss…");
+      // Write pluto-ecss source files into a directory we add to sys.path.
+      const root = "/work";
+      ensureDir(pyodide.FS, root);
+      for (const [name, content] of Object.entries(window.PLUTOPY_FILES)) {
+        const full = root + "/" + name;
+        ensureDir(pyodide.FS, full.substring(0, full.lastIndexOf("/")));
+        pyodide.FS.writeFile(full, content);
+      }
+      pyodide.runPython(`
+import sys
+if "/work" not in sys.path:
+    sys.path.insert(0, "/work")
+import pluto_ecss
+from pluto_ecss.parser   import parse as _pluto_parse, PlutoParseError as _PlutoParseError
+from pluto_ecss.transpiler import transpile as _pluto_transpile
+from pluto_ecss.formatter import format_source as _pluto_format
+
+def _run_user(src):
+    import io, contextlib, traceback, sys
+    buf = io.StringIO()
+    try:
+        py_src = _pluto_transpile(src)
+    except Exception as e:
+        return f"[parse/transpile error]\\n{e}"
+    ns = {"__name__": "__main__"}
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+        try:
+            exec(compile(py_src, "<playground>", "exec"), ns)
+        except Exception:
+            traceback.print_exc()
+    return buf.getvalue()
+`);
+      setStatus("Ready", "ok");
+      for (const id of ["btn-parse", "btn-compile", "btn-run", "btn-format"]) {
+        $(id).disabled = false;
+      }
+    }
+
+    function setOutput(target, text) {
+      $("out-output").hidden = target !== "output";
+      $("out-python").hidden = target !== "python";
+      $("out-tree").hidden   = target !== "tree";
+      for (const b of document.querySelectorAll(".tabs button")) {
+        b.classList.toggle("active", b.dataset.tab === target);
+      }
+      $("out-" + target).textContent = text;
+    }
+
+    function pluto() { return $("source").value; }
+
+    async function doParse() {
+      try {
+        const res = pyodide.runPython(`_pluto_parse(${JSON.stringify(pluto())}).pretty()`);
+        setOutput("tree", res);
+        setStatus("Parsed", "ok");
+      } catch (e) {
+        setOutput("tree", String(e));
+        setStatus("Parse error", "err");
+      }
+    }
+
+    async function doCompile() {
+      try {
+        const res = pyodide.runPython(`_pluto_transpile(${JSON.stringify(pluto())})`);
+        setOutput("python", res);
+        setStatus("Compiled", "ok");
+      } catch (e) {
+        setOutput("python", String(e));
+        setStatus("Compile error", "err");
+      }
+    }
+
+    async function doRun() {
+      setStatus("Running…", "warn");
+      try {
+        const res = pyodide.runPython(`_run_user(${JSON.stringify(pluto())})`);
+        setOutput("output", res || "(no output)");
+        setStatus("Ran", "ok");
+      } catch (e) {
+        setOutput("output", String(e));
+        setStatus("Run error", "err");
+      }
+    }
+
+    async function doFormat() {
+      try {
+        const res = pyodide.runPython(`_pluto_format(${JSON.stringify(pluto())})`);
+        $("source").value = res;
+        setStatus("Formatted", "ok");
+      } catch (e) {
+        setOutput("output", String(e));
+        setStatus("Format error", "err");
+      }
+    }
+
+    document.querySelectorAll(".tabs button").forEach(b => {
+      b.addEventListener("click", () => {
+        const tab = b.dataset.tab;
+        $("out-output").hidden = tab !== "output";
+        $("out-python").hidden = tab !== "python";
+        $("out-tree").hidden   = tab !== "tree";
+        for (const x of document.querySelectorAll(".tabs button")) {
+          x.classList.toggle("active", x.dataset.tab === tab);
+        }
+      });
+    });
+
+    $("example").addEventListener("change", () => {
+      $("source").value = EXAMPLES[$("example").value];
+    });
+
+    $("btn-parse").addEventListener("click", doParse);
+    $("btn-compile").addEventListener("click", doCompile);
+    $("btn-run").addEventListener("click", doRun);
+    $("btn-format").addEventListener("click", doFormat);
+
+    $("source").value = EXAMPLES["01"];
+    boot().catch(e => {
+      setStatus("Boot failed: " + e, "err");
+      console.error(e);
+    });
+  </script>
+</body>
+</html>

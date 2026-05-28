@@ -1,0 +1,168 @@
+// PLUTO grammar (subset of ECSS-E-ST-70-32C)
+// Parsed with Earley; semicolons are ignored as separators so that scripts
+// can use them or newlines interchangeably.
+
+%import common.WS
+%import common.NUMBER
+%import common.ESCAPED_STRING
+%ignore WS
+%ignore /\/\/[^\n]*/
+%ignore ";"
+
+WORD.-10: /[A-Za-z_][A-Za-z0-9_]*/
+
+start: procedure_body
+
+procedure_body: "procedure" section+ "end" "procedure"
+
+?section: declare_section
+        | preconditions_section
+        | main_section
+        | watchdog_section
+        | confirmation_section
+
+// ---- declare ----
+declare_section: "declare" event_decl ("," event_decl)* "end" "declare"
+event_decl: "event" name ("described" "by" description)?
+
+// ---- preconditions ----
+preconditions_section: "preconditions" precondition+ "end" "preconditions"
+?precondition: if_stmt | wait_stmt
+
+// ---- main ----
+main_section: "main" statement+ "end" "main"
+
+// ---- watchdog ----
+watchdog_section: "watchdog" handler+ "end" "watchdog"
+handler: "on" name "do" statement+ "end" "on"
+
+// ---- confirmation ----
+confirmation_section: "confirmation" statement+ "end" "confirmation"
+
+// ---- statements ----
+?statement: initiate_confirm_step
+          | initiate_confirm_stmt
+          | initiate_stmt
+          | parallel_all_stmt
+          | parallel_one_stmt
+          | context_stmt
+          | if_stmt
+          | case_stmt
+          | while_stmt
+          | for_stmt
+          | repeat_stmt
+          | wait_stmt
+          | assign_stmt
+          | log_stmt
+          | inform_stmt
+          | raise_stmt
+          | save_context_stmt
+
+initiate_stmt: "initiate" activity_call refer_by?
+refer_by: "refer" "by" name
+initiate_confirm_stmt: "initiate" "and" "confirm" activity_call refer_by? continuation_test?
+// Step structure mirrors a procedure (spec A.1.7.1): a step can carry
+// declare, preconditions, watchdog, confirmation sections alongside main.
+initiate_confirm_step: "initiate" "and" "confirm" "step" name section+ "end" "step" continuation_test?
+
+// ---- continuation test (spec A.3.9.33) ----
+continuation_test: "in" "case" continuation_arm+ "end" "case"
+continuation_arm: confirmation_status_label ":" continuation_action
+
+?confirmation_status_label: cs_confirmed | cs_not_confirmed | cs_aborted
+cs_confirmed:     "confirmed"
+cs_not_confirmed: "not" "confirmed"
+cs_aborted:       "aborted"
+
+?continuation_action: act_resume
+                    | act_abort
+                    | act_restart
+                    | act_ask
+                    | act_raise
+                    | act_continue
+                    | act_terminate
+act_resume:   "resume"
+act_abort:    "abort"
+act_continue: "continue"
+act_terminate:"terminate"
+act_ask:      "ask" "user"
+act_raise:    "raise" "event" name
+act_restart:  "restart" restart_limit?
+?restart_limit: restart_max | restart_timeout
+restart_max:     "max" expression "times"
+restart_timeout: "with" "timeout" expression
+
+parallel_all_stmt: "in" "parallel" "until" "all" "complete" statement+ "end" "parallel"
+parallel_one_stmt: "in" "parallel" "until" "one" "completes" statement+ "end" "parallel"
+
+context_stmt: "in" "the" "context" "of" qname "do" statement+ "end" "context"
+
+if_stmt: "if" expression "then" if_then ("else" if_else)? "end" "if"
+if_then: statement+
+if_else: statement+
+
+case_stmt: "case" expression "of" case_arm+ ("otherwise" case_otherwise)? "end" "case"
+case_arm: "when" expression "do" statement+
+case_otherwise: statement+
+
+while_stmt: "while" expression "do" statement+ timeout_clause? "end" "while"
+for_stmt: "for" name ":=" expression "to" expression ("by" expression)? "do" statement+ "end" "for"
+repeat_stmt: "repeat" statement+ "until" expression timeout_clause? "end" "repeat"
+
+?wait_stmt: wait_for_event | wait_until_expr
+wait_for_event: "wait" "for" "event" name timeout_clause?
+wait_until_expr: "wait" "until" expression timeout_clause?
+
+timeout_clause: "with" "timeout" expression
+
+assign_stmt: name ":=" expression
+log_stmt: "log" expression
+inform_stmt: "inform" "user" expression
+raise_stmt: "raise" "event" name
+
+// save context: snapshot reporting data into local names (spec A.3.9.5 / A.3.9.25)
+save_context_stmt: "save" "context" "refer" save_context_entry ("," save_context_entry)*
+save_context_entry: "to" qname "by" name
+
+// ---- activity calls ----
+?activity_call: switch_on | switch_off
+switch_on:  "Switch" "on"  qname activity_with?
+switch_off: "Switch" "off" qname activity_with?
+
+// Activity argument clause (spec A.3.9.28).
+// Supports three argument shapes, all named:
+//   simple:  Mode := "safe"
+//   record:  Telecommand record Foo := 1, Bar := "x" end record
+//   array:   Values     array  1, 2, 3 end array
+// `with value set` and `with directives` clauses are out of scope.
+activity_with: "with" arg_item ("," arg_item)* "end" "with"
+?arg_item: simple_arg | record_arg | array_arg
+simple_arg: name ":=" expression
+record_arg: name "record" simple_arg ("," simple_arg)* "end" "record"
+array_arg:  name "array"  expression  ("," expression)*  "end" "array"
+
+// ---- names ----
+name: WORD (WORD)*
+qname: name ("of" name)*
+description: WORD (WORD)*
+
+// ---- property request ----
+property_request: property_name "of" qname
+property_name: WORD ("_" WORD)*
+
+// ---- expressions ----
+?expression: or_expr
+?or_expr: and_expr ("or" and_expr)*
+?and_expr: not_expr ("and" not_expr)*
+?not_expr: "not" not_expr -> not_op | comparison
+?comparison: arith (CMP_OP arith)?
+CMP_OP: ">=" | "<=" | "<>" | ">" | "<" | "="
+?arith: term (ADD_OP term)*
+ADD_OP: "+" | "-"
+?term: factor (MUL_OP factor)*
+MUL_OP: "*" | "/"
+?factor: NUMBER              -> num_lit
+       | ESCAPED_STRING      -> str_lit
+       | property_request    -> prop_req
+       | qname               -> var_ref
+       | "(" expression ")"

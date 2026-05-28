@@ -1,0 +1,43 @@
+"""Transpiled from 01_original.pluto"""
+from pluto_ecss.async_runtime import (
+    Procedure,
+    Event,
+    PlutoAborted,
+    PlutoTerminated,
+    switch_on,
+    switch_off,
+    initiate,
+    initiate_and_confirm,
+    initiate_and_confirm_step,
+    parallel_until_all,
+    parallel_until_one,
+    wait_for_event,
+    wait_until,
+    inform_user,
+    pluto_log,
+)
+
+
+async def main():
+    proc = Procedure("transpiled")
+    proc.start()
+    # --- declarations ---
+    proc.declare_event(Event("chaos", description='Total disaster'))
+    proc.declare_event(Event("chaos2"))
+    # --- main ---
+    initiate(proc, switch_on("Star Tracker2"))
+    async def _branch_1():
+        async def _step_2():
+            await initiate_and_confirm(proc, switch_on("Reaction Wheel3 of AOC of Satellite"))
+        await initiate_and_confirm_step(proc, "SWITCH ON SECOND STAR TRACKER", _step_2)
+    async def _branch_3():
+        async def _step_4():
+            await initiate_and_confirm(proc, switch_on("Star Tracker1"))
+        await initiate_and_confirm_step(proc, "SWITCH ON FIRST STAR TRACKER", _step_4)
+    await parallel_until_all([_branch_1, _branch_3])
+    proc.finish()
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

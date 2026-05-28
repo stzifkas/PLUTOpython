@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/arc/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Finish-Up-A-Thon arc - pluto-ecss</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Finish-Up-A-Thon arc";
+        var mkdocs_page_input_path = "arc.md";
+        var mkdocs_page_url = "/pluto-ecss/arc/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../grammar/">Grammar reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Finish-Up-A-Thon arc</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#before-the-gsoc-snapshot">Before — the GSoC snapshot</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#after-main-may-2026">After — main, May 2026</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ai-assisted-revival">AI-assisted revival</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Finish-Up-A-Thon arc</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/arc.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="the-finish-up-a-thon-arc">The Finish-Up-A-Thon arc<a class="headerlink" href="#the-finish-up-a-thon-arc" title="Permanent link">&para;</a></h1>
+<p>This repo started life in <strong>2019</strong> as a <a href="https://github.com/stzifkas/pluto-ecss/tree/v0.1-gsoc-2019">Google Summer of Code work product</a>: a sample parser for the PLUTO DSL that built a parse tree out of a single hard-coded script and "ran" it by walking the tree. It was a proof of concept that never grew past one example file. It sat dormant for nearly seven years.</p>
+<p>For the <a href="https://dev.to/github">GitHub Finish-Up-A-Thon</a> (May–June 2026), it's been revived as an actual installable PLUTO transpiler.</p>
+<h2 id="before-the-gsoc-snapshot">Before — the GSoC snapshot<a class="headerlink" href="#before-the-gsoc-snapshot" title="Permanent link">&para;</a></h2>
+<p>Tag <a href="https://github.com/stzifkas/pluto-ecss/releases/tag/v0.1-gsoc-2019"><code>v0.1-gsoc-2019</code></a>, branch <a href="https://github.com/stzifkas/pluto-ecss/tree/legacy/gsoc-2019"><code>legacy/gsoc-2019</code></a>.</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>State in 2019</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar</td>
+<td>~30 lines, covered <code>initiate</code>, <code>initiate and confirm (step)</code>, <code>parallel until all</code>, <code>switch on</code>, event declarations</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>Tree-walking interpreter inside the parser file. Threaded but missing many features.</td>
+</tr>
+<tr>
+<td>Codebase</td>
+<td>Two <code>.py</code> files, mixed concerns, several syntax-level bugs (typos like <code>setExecutionSatus</code>, missing <code>import types</code>, <code>super.__init__</code> with no parens)</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Packaging</td>
+<td>None — <code>python pluto_ecss.py</code> only</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>None — entry point hard-coded to <code>script.pluto</code></td>
+</tr>
+<tr>
+<td>Output</td>
+<td>Side effects from a tree walk; no Python emission</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td>README sketched the design but didn't say how to use it</td>
+</tr>
+</tbody>
+</table>
+<h2 id="after-main-may-2026">After — <code>main</code>, May 2026<a class="headerlink" href="#after-main-may-2026" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>State in 2026</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar</td>
+<td><code>if/else</code>, <code>case</code>, <code>while</code>, <code>for</code>, <code>repeat … until</code>, <code>wait for event</code> / <code>wait until</code> with <code>with timeout</code>, <code>:=</code> assignment, <code>raise event</code>, <code>log</code>, <code>inform user</code>, <code>in parallel until one completes</code>, full expression grammar (arithmetic / comparison / boolean), watchdog handlers — plus everything from 2019</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td><strong>Transpiler</strong>: PLUTO → parse tree → Python source. Generated <code>.py</code> imports a runtime library and is independently runnable / debuggable / shippable.</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td><code>pluto_ecss.runtime</code> with <code>Procedure</code>, <code>Event</code>, <code>Activity</code>, <code>parallel_until_all</code>, <code>wait_for_event</code>, watchdog dispatch, etc. Activities are pluggable.</td>
+</tr>
+<tr>
+<td>Package</td>
+<td><code>pip install pluto-ecss</code>, proper <code>src/</code> layout, packaged grammar file</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><code>pluto-ecss parse | compile | run | demo</code> with <code>-v</code> for runtime logging</td>
+</tr>
+<tr>
+<td>Demo</td>
+<td><code>pluto-ecss demo</code> — live Rich-based TUI of a fake satellite reacting to procedure activities in real time</td>
+</tr>
+<tr>
+<td>Errors</td>
+<td>Friendly parse errors with file:line:column, source caret, structural hints</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>48 pytest cases covering parser, transpiler output, runtime, end-to-end CLI, and the TUI</td>
+</tr>
+<tr>
+<td>CI</td>
+<td>GitHub Actions matrix on Python 3.9 / 3.11 / 3.13</td>
+</tr>
+<tr>
+<td>Highlighter</td>
+<td>Pygments lexer for <code>.pluto</code> files; powers this docs site</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td>This mkdocs site, deployed from <code>docs/</code> via CI</td>
+</tr>
+<tr>
+<td>Formatter</td>
+<td><code>pluto-ecss fmt</code> — idempotent canonical pretty-printer; <code>--check</code> mode for CI gating</td>
+</tr>
+<tr>
+<td>Generator</td>
+<td><code>pluto-ecss gen spec.yaml</code> — declarative YAML → PLUTO scaffold for templating procedures</td>
+</tr>
+<tr>
+<td>Playground</td>
+<td>Browser-based PLUTO compiler and runner, no install required, served from <code>/playground/</code> on the docs site</td>
+</tr>
+<tr>
+<td>ECSS-E-ST-70-32C coverage</td>
+<td>Procedure/step sub-bodies (A.1.7), property references (A.3.9.8), set-context (A.3.9.10), step + activity refer-by (A.3.9.12, A.3.9.26, A.3.9.27), record + array activity arguments (A.3.9.28), reporting data + <code>save context</code> (A.3.9.5, A.3.9.25), continuation tests with all seven actions (A.3.9.33)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ai-assisted-revival">AI-assisted revival<a class="headerlink" href="#ai-assisted-revival" title="Permanent link">&para;</a></h2>
+<p>This revival was AI-assisted. The architectural decisions (transpiler over interpreter, Rich for the TUI, lowering WORD priority to fix the keyword-vs-identifier ambiguity in the Earley lexer, the runtime API surface) and the test design are mine; the AI assistant accelerated typing, drafted the Lark grammar's first cut, and surfaced the Earley lexer priority bug that would have taken me a couple of hours to chase down.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../architecture/" class="btn btn-neutral float-left" title="Architecture"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../playground/" class="btn btn-neutral float-right" title="Playground">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+      <span><a href="../architecture/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../playground/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

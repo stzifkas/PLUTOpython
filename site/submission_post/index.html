@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/submission_post/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Submission post - pluto-ecss</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Submission post";
+        var mkdocs_page_input_path = "submission_post.md";
+        var mkdocs_page_url = "/pluto-ecss/submission_post/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../grammar/">Grammar reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../arc/">Finish-Up-A-Thon arc</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Submission post</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/submission_post.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <!--
+Draft for the GitHub Finish-Up-A-Thon submission post.
+Paste into dev.to and add:
+  - Cover image (any small satellite/spacecraft illustration works)
+  - Tags: githubFinishUpAThon, python, opensource, parsers
+  - Canonical URL: pointing at the GitHub repo if you want
+-->
+
+<h1 id="i-finally-finished-my-gsoc-2019-project-seven-years-later">I finally finished my GSoC 2019 project, seven years later<a class="headerlink" href="#i-finally-finished-my-gsoc-2019-project-seven-years-later" title="Permanent link">&para;</a></h1>
+<p>Back in <strong>2019</strong>, as part of a <a href="https://github.com/stzifkas/pluto-ecss/tree/v0.1-gsoc-2019">Google Summer of Code proposal</a>, I started building an open-source parser for <strong>PLUTO</strong> — the procedure language <a href="https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/">standardised by ECSS</a> (<code>ECSS-E-ST-70-32C</code>) for spacecraft operations. PLUTO is the DSL ground operators write to bring up a star tracker, run a parallel safety sequence, or react to a satellite-on-orbit event.</p>
+<p>My proposal sample built a parse tree from one hard-coded script and "ran" it by walking the tree. It was a proof-of-concept I never grew past one example file. Then life happened, and it sat dormant for seven years.</p>
+<p>When the <strong>GitHub Finish-Up-A-Thon</strong> showed up, this was the obvious candidate. So I picked it up, this time with AI tooling at my side, and turned it into something real.</p>
+<h2 id="before-the-gsoc-2019-snapshot">Before — the GSoC 2019 snapshot<a class="headerlink" href="#before-the-gsoc-2019-snapshot" title="Permanent link">&para;</a></h2>
+<p>Branch <a href="https://github.com/stzifkas/pluto-ecss/tree/legacy/gsoc-2019"><code>legacy/gsoc-2019</code></a>, tag <a href="https://github.com/stzifkas/pluto-ecss/releases/tag/v0.1-gsoc-2019"><code>v0.1-gsoc-2019</code></a>. Five files, ~30 lines of grammar, no tests, no CLI, several straight-up bugs:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># pluto_ecss.py (2019) — a few real lines from the original</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WatchdogSymbol</span><span class="p">(</span><span class="n">Symbol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">events</span><span class="p">,</span><span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c1"># `super.__init__(...)` without parens — would crash if reached</span>
+        <span class="o">...</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ProcedureSymbol</span><span class="p">(</span><span class="n">Symbol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setExecutionSatus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>   <span class="c1"># typo: Satus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">executionStatus</span> <span class="o">=</span> <span class="n">data</span>
+</code></pre></div>
+
+<p>The original grammar covered five PLUTO constructs and a single test script:</p>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">declare</span>
+      <span class="kd">event</span> <span class="n">chaos</span> <span class="kd">described</span> <span class="k">by</span> <span class="n">Total</span> <span class="n">disaster</span><span class="p">,</span> <span class="kd">event</span> <span class="n">chaos2</span>
+    <span class="kd">end</span> <span class="kr">declare</span>
+    <span class="kr">main</span>
+      <span class="kp">initiate</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker2</span>
+      <span class="k">in</span> <span class="k">parallel</span> <span class="k">until</span> <span class="k">all</span> <span class="k">complete</span>
+        <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">SWITCH</span> <span class="n">ON</span> <span class="n">SECOND</span> <span class="n">STAR</span> <span class="n">TRACKER</span>
+          <span class="kr">main</span>
+            <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Reaction</span> <span class="n">Wheel3</span> <span class="k">of</span> <span class="n">AOC</span> <span class="k">of</span> <span class="n">Satellite</span><span class="p">;</span>
+          <span class="kd">end</span> <span class="kr">main</span>
+        <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+        <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">SWITCH</span> <span class="n">ON</span> <span class="n">FIRST</span> <span class="n">STAR</span> <span class="n">TRACKER</span>
+          <span class="kr">main</span>
+            <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span><span class="p">;</span>
+          <span class="kd">end</span> <span class="kr">main</span>
+        <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+      <span class="kd">end</span> <span class="k">parallel</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<p>That ran end-to-end. Anything else was a parse error or a <code>NameError</code> because of <code>types</code> never being imported.</p>
+<h2 id="after-main-may-2026">After — <code>main</code>, May 2026<a class="headerlink" href="#after-main-may-2026" title="Permanent link">&para;</a></h2>
+<p>Same script, same syntax — but now it transpiles to readable Python:</p>
+<div class="codehilite"><pre><span></span><code>$ pluto-ecss compile examples/01_original.pluto
+&quot;&quot;&quot;Transpiled from 01_original.pluto&quot;&quot;&quot;
+from pluto_ecss.runtime import (
+    Procedure, Event, PlutoAborted, PlutoTerminated,
+    switch_on, switch_off,
+    initiate, initiate_and_confirm, initiate_and_confirm_step,
+    parallel_until_all, parallel_until_one,
+    wait_for_event, wait_until,
+    inform_user, pluto_log,
+)
+
+def main():
+    proc = Procedure(&quot;transpiled&quot;)
+    proc.start()
+    proc.declare_event(Event(&quot;chaos&quot;, description=&#39;Total disaster&#39;))
+    proc.declare_event(Event(&quot;chaos2&quot;))
+    initiate(proc, switch_on(&quot;Star Tracker2&quot;))
+    def _branch_1():
+        def _step_2():
+            initiate_and_confirm(proc, switch_on(&quot;Reaction Wheel3 of AOC of Satellite&quot;))
+        initiate_and_confirm_step(proc, &quot;SWITCH ON SECOND STAR TRACKER&quot;, _step_2)
+    def _branch_3():
+        def _step_4():
+            initiate_and_confirm(proc, switch_on(&quot;Star Tracker1&quot;))
+        initiate_and_confirm_step(proc, &quot;SWITCH ON FIRST STAR TRACKER&quot;, _step_4)
+    parallel_until_all([_branch_1, _branch_3])
+    proc.finish()
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></div>
+
+<p>And it actually executes:</p>
+<div class="codehilite"><pre><span></span><code>$ pluto-ecss run examples/01_original.pluto
+[ACTIVITY] Switch on Star Tracker2
+[ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
+[ACTIVITY] Switch on Star Tracker1
+</code></pre></div>
+
+<h2 id="grammar-coverage-went-from-5-constructs-to-most-of-the-ecss-spec">Grammar coverage went from ~5 constructs to most of the ECSS spec<a class="headerlink" href="#grammar-coverage-went-from-5-constructs-to-most-of-the-ecss-spec" title="Permanent link">&para;</a></h2>
+<p>The 2019 grammar handled <code>procedure / main / initiate / initiate and confirm / parallel until all</code>. After eleven days of focused work, the implementation covers, with anchors to the ECSS sections:</p>
+<ul>
+<li><strong>A.1.7</strong> — Full procedure &amp; step structure: <code>declare / preconditions / watchdog / confirmation / main</code>, and steps mirror procedures.</li>
+<li><strong>A.3.9.8</strong> — Object references with property requests: <code>execution_status of &lt;step&gt;</code>, <code>validity_status of &lt;param&gt;</code>, etc.</li>
+<li><strong>A.3.9.10</strong> — <code>in the context of X (of Y) do … end context</code> — qualifies activity targets, properly nested.</li>
+<li><strong>A.3.9.5 / A.3.9.25</strong> — <code>save context refer to Temperature of Battery1 by TempB1, …</code> — telemetry snapshotting.</li>
+<li><strong>A.3.9.26 / A.3.9.27</strong> — <code>refer by &lt;name&gt;</code> on both fire-and-forget initiate and synchronous initiate-and-confirm.</li>
+<li><strong>A.3.9.28</strong> — Activity arguments in all three shapes: simple (<code>Mode := "safe"</code>), record (<code>Tx record A := 1, B := 2 end record</code>), and array (<code>Vs array 1, 2, 3 end array</code>).</li>
+<li><strong>A.3.9.33</strong> — Continuation tests with all seven actions (<code>resume / abort / continue / terminate / ask user / raise event / restart [max N times | with timeout T]</code>) and the A.2.5 default actions for arms that aren't explicitly set.</li>
+</ul>
+<p>Plus the everyday language stuff: <code>if/else</code>, <code>case/when/otherwise</code>, <code>while</code>, <code>for</code>, <code>repeat</code>, <code>wait until</code> / <code>wait for event</code> with optional <code>with timeout</code>, expressions with arithmetic / comparison / boolean operators, <code>:=</code> assignment, <code>raise event</code>, <code>log</code>, <code>inform user</code>, <code>in parallel until all complete</code> and <code>until one completes</code>.</p>
+<h2 id="a-live-tui-demo-of-the-runtime">A live TUI demo of the runtime<a class="headerlink" href="#a-live-tui-demo-of-the-runtime" title="Permanent link">&para;</a></h2>
+<p><code>pluto-ecss demo SCRIPT</code> runs a transpiled procedure against a Rich-based dashboard that lights up as activities execute:</p>
+<div class="codehilite"><pre><span></span><code>╭──────────────────── Procedure: 01_original.pluto ─────────────────────╮
+│                              COMPLETED                                │
+╰───────────────────────────────────────────────────────────────────────╯
+                     🛰  Satellite (AOC subsystem)
+┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Component             ┃        Status         ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ AOC Electronics1      │          OFF          │
+│ AOC Electronics2      │          OFF          │
+│ Reaction Wheel3       │          ON           │
+│ Star Tracker1         │          ON           │
+│ Star Tracker2         │          ON           │
+└───────────────────────┴───────────────────────┘
+╭──────────── 📡 Activity feed ────────────╮
+│ ▶ Switch on  Star Tracker2                │
+│ ▶ Switch on  Reaction Wheel3 of AOC of …  │
+│ ▶ Switch on  Star Tracker1                │
+╰───────────────────────────────────────────╯
+</code></pre></div>
+
+<h2 id="compile-knobs-because-the-same-pluto-procedure-has-many-right-targets">Compile knobs, because the same PLUTO procedure has many right targets<a class="headerlink" href="#compile-knobs-because-the-same-pluto-procedure-has-many-right-targets" title="Permanent link">&para;</a></h2>
+<p>The transpiler isn't one-size-fits-all. Modern mission-control stacks are asyncio-based; libraries want subclassable procedures; some tools want structured data instead of Python. So:</p>
+<ul>
+<li><code>--runtime async</code> → emits <code>async def main()</code> against an asyncio runtime with <code>asyncio.gather</code> for parallel sections.</li>
+<li><code>--style class</code> → emits a <code>class TranspiledProcedure(Procedure)</code> with declarations in <code>__init__</code> and main body as <code>run()</code>.</li>
+<li><code>--emit json</code> → skips Python entirely, emits a structured JSON description of the procedure for tooling integration.</li>
+<li><code>--no-runtime</code> → inlines the runtime so the output is a single self-contained <code>.py</code> with no <code>pluto-ecss</code> dependency.</li>
+</ul>
+<p>All four compose. <code>--style class --runtime async</code> works.</p>
+<h2 id="friendly-errors">Friendly errors<a class="headerlink" href="#friendly-errors" title="Permanent link">&para;</a></h2>
+<p>The 2019 version raised raw Lark exceptions. The new version catches them and explains:</p>
+<div class="codehilite"><pre><span></span><code>$ pluto-ecss parse bad.pluto
+pluto-ecss: parse error
+at bad.pluto:4:7: cannot start a token with &#39;l&#39;; expected &#39;and&#39;, &#39;or&#39;, &#39;then&#39;, or one of 2 more
+
+     4 |       log &quot;hi&quot;
+       |       ^
+
+hint: an if statement looks like: if EXPR then STATEMENTS end if
+</code></pre></div>
+
+<h2 id="what-landed-in-numbers">What landed in numbers<a class="headerlink" href="#what-landed-in-numbers" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2019</th>
+<th>2026</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar</td>
+<td>30 lines</td>
+<td>168 lines</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>0</td>
+<td>224 passing</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>1</td>
+<td>17</td>
+</tr>
+<tr>
+<td>LOC (package)</td>
+<td>~600</td>
+<td>3 778</td>
+</tr>
+<tr>
+<td>CLI surface</td>
+<td>none</td>
+<td><code>parse / compile / run / demo / fmt / gen</code></td>
+</tr>
+<tr>
+<td>Runtimes</td>
+<td>inline tree walker</td>
+<td>threaded + asyncio</td>
+</tr>
+<tr>
+<td>Output formats</td>
+<td>side effects</td>
+<td>Python (4 variants) + JSON</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td>one README</td>
+<td>full mkdocs site with Pygments lexer</td>
+</tr>
+<tr>
+<td>Playground</td>
+<td>none</td>
+<td>browser-based via Pyodide</td>
+</tr>
+<tr>
+<td>ECSS sections covered</td>
+<td>a handful</td>
+<td>most of A.1 and A.3</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ai-assisted-honestly">AI-assisted, honestly<a class="headerlink" href="#ai-assisted-honestly" title="Permanent link">&para;</a></h2>
+<p>This revival was AI-assisted. I used an AI coding assistant to accelerate the rebuild — particularly for designing the Lark grammar's keyword-priority resolution (the original grammar had brittle negative-lookahead patterns that broke on common keywords), the transpiler's parse-tree-walker, and the runtime's threading primitives. The architectural decisions, the choice to write a transpiler instead of an interpreter, and the test design were mine; the assistant accelerated the typing and surfaced an Earley lexer-priority bug that would have cost me hours to chase down alone.</p>
+<p>The interesting thing about doing this with AI tooling at hand is that it removes the discouragement: the 2019 code had real bugs and missing imports that, in 2019, felt like cliff-edges. In 2026, fixing those and <em>then</em> doing the spec work felt like one continuous flow rather than three separate undertakings.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="https://github.com/stzifkas/pluto-ecss">Repo</a></strong> — <code>main</code> is the after, <code>legacy/gsoc-2019</code> is the before</li>
+<li><strong><a href="https://stzifkas.github.io/pluto-ecss/">Docs</a></strong> — quickstart, grammar reference, architecture</li>
+<li><strong><a href="https://stzifkas.github.io/pluto-ecss/playground/">Playground</a></strong> — write PLUTO and run it in the browser; no install</li>
+<li><code>pip install -e .</code> → <code>pluto-ecss run examples/05_full_bringup.pluto</code></li>
+</ul>
+<p>The completion arc is real. Seven years of dormancy, eleven days of focused finishing, and what was a "sample for a proposal" is now an installable transpiler with a real test suite, a CLI, an asyncio runtime, a docs site, and a browser playground.</p>
+<p>Sometimes you really can come back to the abandoned thing and finally ship it.</p>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

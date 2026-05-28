@@ -1,0 +1,5 @@
+[console_scripts]
+plutopy = plutopy.cli:main
+
+[pygments.lexers]
+pluto = plutopy.pygments_lexer:PlutoLexer

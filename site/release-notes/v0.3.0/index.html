@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/release-notes/v0.3.0/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>pluto-ecss 0.3.0 — Finish-Up-A-Thon edition - pluto-ecss</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "pluto-ecss 0.3.0 \u2014 Finish-Up-A-Thon edition";
+        var mkdocs_page_input_path = "release-notes/v0.3.0.md";
+        var mkdocs_page_url = "/pluto-ecss/release-notes/v0.3.0/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../grammar/">Grammar reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../arc/">Finish-Up-A-Thon arc</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">pluto-ecss 0.3.0 — Finish-Up-A-Thon edition</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/release-notes/v0.3.0.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="pluto-ecss-030-finish-up-a-thon-edition">pluto-ecss 0.3.0 — Finish-Up-A-Thon edition<a class="headerlink" href="#pluto-ecss-030-finish-up-a-thon-edition" title="Permanent link">&para;</a></h1>
+<p>After seven years dormant, the GSoC-2019 PLUTO prototype is now a real
+transpiler. This release is the snapshot used for the GitHub
+Finish-Up-A-Thon submission.</p>
+<p>The "before" is preserved at tag <code>v0.1-gsoc-2019</code> and on branch
+<code>legacy/gsoc-2019</code>. The "after" is everything 24 commits later on
+<code>main</code>.</p>
+<h2 id="highlights">Highlights<a class="headerlink" href="#highlights" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>End-to-end transpiler.</strong> PLUTO source → Lark parse tree → readable
+  Python that runs against a small runtime library
+  (<code>pluto_ecss.runtime</code> / <code>pluto_ecss.async_runtime</code>).</li>
+<li><strong>CLI</strong>: <code>pluto-ecss parse | compile | run | demo | fmt | gen</code>.</li>
+<li><strong>Compile knobs</strong>: <code>--runtime async</code>, <code>--style class</code>, <code>--emit json</code>,
+  <code>--no-runtime</code> (inline). All compose.</li>
+<li><strong>Live TUI demo</strong> (<code>pluto-ecss demo</code>) — a fake satellite reacts to
+  procedures in real time via Rich.</li>
+<li><strong>Browser playground</strong> — Pyodide loads the bundled source so you can
+  write PLUTO and run it client-side, no install needed.</li>
+<li><strong>Friendly parse errors</strong> with source caret + structural hints.</li>
+<li><strong>Pygments lexer</strong> registered as the <code>pluto</code> language; the mkdocs
+  site uses it for syntax highlighting.</li>
+</ul>
+<h2 id="ecss-e-st-70-32c-coverage">ECSS-E-ST-70-32C coverage<a class="headerlink" href="#ecss-e-st-70-32c-coverage" title="Permanent link">&para;</a></h2>
+<p>Sections of the PLUTO spec now actually implemented:</p>
+<ul>
+<li>A.1 procedure / step structure: full declare / preconditions /
+  watchdog / confirmation / main symmetry</li>
+<li>A.3.9.5 + A.3.9.25 — <code>save context refer to &lt;ref&gt; by &lt;local&gt;</code></li>
+<li>A.3.9.8 — <code>&lt;property&gt; of &lt;ref&gt;</code> (execution_status, validity_status,
+  start_time, completion_time, confirmation_status, value,
+  engineering_value, sampling_time)</li>
+<li>A.3.9.10 — <code>in the context of X (of Y) do … end context</code></li>
+<li>A.3.9.11 — parallel until all / until one</li>
+<li>A.3.9.12 — initiate and confirm step (+ continuation tests)</li>
+<li>A.3.9.17–22 — assignment, if/case/while/repeat/for, timeouts</li>
+<li>A.3.9.26 — initiate and confirm with refer-by + continuation tests</li>
+<li>A.3.9.27 — initiate refer by</li>
+<li>A.3.9.28 — activity arguments (simple, record, array)</li>
+<li>A.3.9.29–30 — inform user, log</li>
+<li>A.3.9.31 — watchdog handlers (synchronous dispatch)</li>
+<li>A.3.9.33 — continuation tests, all seven actions, restart bounds,
+  A.2.5 defaults</li>
+</ul>
+<h2 id="stats">Stats<a class="headerlink" href="#stats" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2019 (<code>v0.1-gsoc-2019</code>)</th>
+<th>0.3.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grammar lines</td>
+<td>~30</td>
+<td>168</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>0</td>
+<td>224 passing</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>1</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Package LOC</td>
+<td>~600</td>
+<td>3 778</td>
+</tr>
+<tr>
+<td>CLI subcommands</td>
+<td>0</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Runtime targets</td>
+<td>inline tree-walker</td>
+<td>threaded + asyncio</td>
+</tr>
+<tr>
+<td>Output formats</td>
+<td>side effects</td>
+<td>Python (4 variants) + JSON</td>
+</tr>
+</tbody>
+</table>
+<h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>pluto-ecss
+pluto-ecss<span class="w"> </span>run<span class="w"> </span>examples/01_original.pluto
+</code></pre></div>
+
+<p>The release wheel (<code>pluto-ecss-0.3.0-py3-none-any.whl</code>) and sdist
+(<code>pluto-ecss-0.3.0.tar.gz</code>) are attached to this GitHub release. Both
+pass <code>twine check</code>.</p>
+<h2 id="links">Links<a class="headerlink" href="#links" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://stzifkas.github.io/pluto-ecss/">Docs</a></li>
+<li><a href="https://stzifkas.github.io/pluto-ecss/playground/">Playground</a></li>
+<li><a href="https://stzifkas.github.io/pluto-ecss/arc/">Finish-Up-A-Thon arc page</a></li>
+<li>Submission post draft: <code>docs/submission_post.md</code></li>
+</ul>
+<h2 id="breaking-changes-from-02x">Breaking changes from 0.2.x<a class="headerlink" href="#breaking-changes-from-02x" title="Permanent link">&para;</a></h2>
+<p>The 0.2 series was a pre-release; nobody installed it from PyPI. For
+completeness, between 0.2 and 0.3:</p>
+<ul>
+<li><code>Procedure.get_property(ref, prop)</code> now resolves through activities
+  → local reporting-data snapshots → global reporting-data registry,
+  and returns <code>"not_initiated"</code> (instead of raising) for the
+  <code>execution_status</code> of an unknown reference.</li>
+<li><code>initiate(proc, call)</code> and <code>initiate_and_confirm(proc, call)</code> now
+  accept an <code>instance_name</code> kwarg (from <code>refer by</code>).</li>
+<li><code>initiate_and_confirm_step</code> now takes <code>proc</code> as its first argument
+  and registers the step under its name so <code>&lt;property&gt; of &lt;step&gt;</code> is
+  queryable.</li>
+<li>New <code>PlutoAborted</code> and <code>PlutoTerminated</code> exception types for the
+  <code>abort</code> / <code>terminate</code> continuation actions.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

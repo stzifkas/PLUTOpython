@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/examples/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Examples - pluto-ecss</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Examples";
+        var mkdocs_page_input_path = "examples.md";
+        var mkdocs_page_url = "/pluto-ecss/examples/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../grammar/">Grammar reference</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Examples</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-the-original-gsoc-demo">1. The original GSoC demo</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-assignment-comparison-conditional">2. Assignment, comparison, conditional</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-loops">3. Loops</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#4-events">4. Events</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#5-full-bring-up-loops-parallel-events">5. Full bring-up (loops + parallel + events)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#69-new-language-constructs">6–9. New language constructs</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../arc/">Finish-Up-A-Thon arc</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/examples.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h1>
+<p>All examples live in the <a href="https://github.com/stzifkas/pluto-ecss/tree/main/examples"><code>examples/</code></a> directory and ship as part of the repository.</p>
+<h2 id="1-the-original-gsoc-demo">1. The original GSoC demo<a class="headerlink" href="#1-the-original-gsoc-demo" title="Permanent link">&para;</a></h2>
+<p>The 2019 script, untouched. Switches on a star tracker, then in parallel brings up another tracker and a reaction wheel.</p>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">declare</span>
+      <span class="kd">event</span> <span class="n">chaos</span> <span class="kd">described</span> <span class="k">by</span> <span class="n">Total</span> <span class="n">disaster</span><span class="p">,</span> <span class="kd">event</span> <span class="n">chaos2</span>
+    <span class="kd">end</span> <span class="kr">declare</span>
+    <span class="kr">main</span>
+      <span class="kp">initiate</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker2</span>
+      <span class="k">in</span> <span class="k">parallel</span> <span class="k">until</span> <span class="k">all</span> <span class="k">complete</span>
+        <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">SWITCH</span> <span class="n">ON</span> <span class="n">SECOND</span> <span class="n">STAR</span> <span class="n">TRACKER</span>
+          <span class="kr">main</span>
+            <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Reaction</span> <span class="n">Wheel3</span> <span class="k">of</span> <span class="n">AOC</span> <span class="k">of</span> <span class="n">Satellite</span><span class="p">;</span>
+          <span class="kd">end</span> <span class="kr">main</span>
+        <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+        <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">SWITCH</span> <span class="n">ON</span> <span class="n">FIRST</span> <span class="n">STAR</span> <span class="n">TRACKER</span>
+          <span class="kr">main</span>
+            <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span><span class="p">;</span>
+          <span class="kd">end</span> <span class="kr">main</span>
+        <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+      <span class="kd">end</span> <span class="k">parallel</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>$ pluto-ecss run examples/01_original.pluto
+[ACTIVITY] Switch on Star Tracker2
+[ACTIVITY] Switch on Reaction Wheel3 of AOC of Satellite
+[ACTIVITY] Switch on Star Tracker1
+</code></pre></div>
+
+<h2 id="2-assignment-comparison-conditional">2. Assignment, comparison, conditional<a class="headerlink" href="#2-assignment-comparison-conditional" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">main</span>
+      <span class="n">threshold</span> <span class="o">:=</span> <span class="m">42</span>
+      <span class="n">observed</span> <span class="o">:=</span> <span class="m">40</span>
+      <span class="kp">log</span> <span class="s2">&quot;before observation&quot;</span>
+      <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;threshold set to 42&quot;</span>
+      <span class="k">if</span> <span class="n">observed</span> <span class="o">&lt;</span> <span class="n">threshold</span> <span class="k">then</span>
+        <span class="kp">log</span> <span class="s2">&quot;below threshold&quot;</span>
+        <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;all clear&quot;</span>
+      <span class="kd">end</span> <span class="k">if</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<h2 id="3-loops">3. Loops<a class="headerlink" href="#3-loops" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">main</span>
+      <span class="n">counter</span> <span class="o">:=</span> <span class="m">0</span>
+      <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="m">3</span> <span class="k">do</span>
+        <span class="kp">log</span> <span class="s2">&quot;loop iteration&quot;</span>
+        <span class="n">counter</span> <span class="o">:=</span> <span class="n">counter</span> <span class="o">+</span> <span class="m">1</span>
+      <span class="kd">end</span> <span class="k">while</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">1</span> <span class="k">to</span> <span class="m">3</span> <span class="k">do</span>
+        <span class="kp">log</span> <span class="s2">&quot;for iteration&quot;</span>
+      <span class="kd">end</span> <span class="k">for</span>
+      <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;loops finished&quot;</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<h2 id="4-events">4. Events<a class="headerlink" href="#4-events" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">declare</span>
+      <span class="kd">event</span> <span class="n">ready</span> <span class="kd">described</span> <span class="k">by</span> <span class="n">System</span> <span class="n">bring</span> <span class="n">up</span> <span class="k">complete</span>
+    <span class="kd">end</span> <span class="kr">declare</span>
+    <span class="kr">main</span>
+      <span class="kp">log</span> <span class="s2">&quot;raising ready&quot;</span>
+      <span class="kp">raise</span> <span class="kd">event</span> <span class="n">ready</span>
+      <span class="k">wait</span> <span class="k">for</span> <span class="kd">event</span> <span class="n">ready</span>
+      <span class="kp">log</span> <span class="s2">&quot;ready observed; continuing&quot;</span>
+      <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<h2 id="5-full-bring-up-loops-parallel-events">5. Full bring-up (loops + parallel + events)<a class="headerlink" href="#5-full-bring-up-loops-parallel-events" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+    <span class="kr">declare</span>
+      <span class="kd">event</span> <span class="n">boom</span> <span class="kd">described</span> <span class="k">by</span> <span class="n">Critical</span> <span class="n">failure</span>
+    <span class="kd">end</span> <span class="kr">declare</span>
+    <span class="kr">main</span>
+      <span class="n">retries</span> <span class="o">:=</span> <span class="m">0</span>
+      <span class="k">while</span> <span class="n">retries</span> <span class="o">&lt;</span> <span class="m">2</span> <span class="k">do</span>
+        <span class="kp">log</span> <span class="s2">&quot;attempting bring up&quot;</span>
+        <span class="k">in</span> <span class="k">parallel</span> <span class="k">until</span> <span class="k">all</span> <span class="k">complete</span>
+          <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">BRING</span> <span class="n">UP</span> <span class="n">REACTION</span> <span class="n">WHEEL</span>
+            <span class="kr">main</span>
+              <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Reaction</span> <span class="n">Wheel3</span> <span class="k">of</span> <span class="n">AOC</span> <span class="k">of</span> <span class="n">Satellite</span><span class="p">;</span>
+            <span class="kd">end</span> <span class="kr">main</span>
+          <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+          <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">BRING</span> <span class="n">UP</span> <span class="n">STAR</span> <span class="n">TRACKERS</span>
+            <span class="kr">main</span>
+              <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span><span class="p">;</span>
+            <span class="kd">end</span> <span class="kr">main</span>
+          <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+        <span class="kd">end</span> <span class="k">parallel</span>
+        <span class="n">retries</span> <span class="o">:=</span> <span class="n">retries</span> <span class="o">+</span> <span class="m">1</span>
+      <span class="kd">end</span> <span class="k">while</span>
+      <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;bring up complete&quot;</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<h2 id="69-new-language-constructs">6–9. New language constructs<a class="headerlink" href="#69-new-language-constructs" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it demonstrates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>06_if_else.pluto</code></td>
+<td><code>if … then … else … end if</code> and equality comparison</td>
+</tr>
+<tr>
+<td><code>07_case.pluto</code></td>
+<td><code>case … of when V do … otherwise … end case</code></td>
+</tr>
+<tr>
+<td><code>08_watchdog.pluto</code></td>
+<td><code>watchdog on EVENT do … end on end watchdog</code> synchronous dispatch</td>
+</tr>
+<tr>
+<td><code>09_timeout.pluto</code></td>
+<td><code>wait for event … with timeout T</code> bounded wait</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../grammar/" class="btn btn-neutral float-left" title="Grammar reference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../architecture/" class="btn btn-neutral float-right" title="Architecture">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+      <span><a href="../grammar/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../architecture/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/architecture/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Architecture - pluto-ecss</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Architecture";
+        var mkdocs_page_input_path = "architecture.md";
+        var mkdocs_page_url = "/pluto-ecss/architecture/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../grammar/">Grammar reference</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Architecture</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecssgrammar-grammarlark">pluto_ecss.grammar (grammar.lark)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecssparser">pluto_ecss.parser</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecsstranspiler">pluto_ecss.transpiler</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecssruntime">pluto_ecss.runtime</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecsscli">pluto_ecss.cli</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecssdemo">pluto_ecss.demo</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pluto_ecsspygments_lexer">pluto_ecss.pygments_lexer</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../arc/">Finish-Up-A-Thon arc</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Architecture</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/architecture.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<div class="codehilite"><pre><span></span><code>       script.pluto
+           │
+           ▼
+  ┌────────────────────┐
+  │ pluto_ecss.parser     │  Lark Earley parser, grammar.lark
+  └────────────────────┘
+           │ Tree
+           ▼
+  ┌────────────────────┐
+  │ pluto_ecss.transpiler │  Tree walker, emits readable Python source
+  └────────────────────┘
+           │ Python source string
+           ▼
+  ┌────────────────────┐
+  │ pluto_ecss.runtime    │  Procedure, Event, parallel_*, switch_on/off, …
+  └────────────────────┘
+</code></pre></div>
+
+<h2 id="modules">Modules<a class="headerlink" href="#modules" title="Permanent link">&para;</a></h2>
+<h3 id="pluto_ecssgrammar-grammarlark"><code>pluto_ecss.grammar</code> (<code>grammar.lark</code>)<a class="headerlink" href="#pluto_ecssgrammar-grammarlark" title="Permanent link">&para;</a></h3>
+<p>The grammar file is parsed with <a href="https://github.com/lark-parser/lark">Lark</a>'s Earley algorithm.
+Earley handles the PLUTO ambiguity around multi-word identifiers (<code>Star Tracker2</code>, <code>Reaction Wheel3 of AOC of Satellite</code>). The <code>WORD</code> terminal is declared with priority <code>-10</code> so string-literal keywords always win the tokenisation race.</p>
+<h3 id="pluto_ecssparser"><code>pluto_ecss.parser</code><a class="headerlink" href="#pluto_ecssparser" title="Permanent link">&para;</a></h3>
+<p>A thin wrapper around the cached Lark parser. Adds friendly error wrapping: parse failures raise <code>PlutoParseError</code> with source line/column, a caret marker, and a structural hint.</p>
+<h3 id="pluto_ecsstranspiler"><code>pluto_ecss.transpiler</code><a class="headerlink" href="#pluto_ecsstranspiler" title="Permanent link">&para;</a></h3>
+<p>A <code>_Emitter</code> class with one <code>_stmt_&lt;rulename&gt;</code> method per statement kind. Every method returns a list of Python source lines; the caller indents them as it splices them into the surrounding block. The output is plain Python — no eval-of-strings, no DSL trickery.</p>
+<h3 id="pluto_ecssruntime"><code>pluto_ecss.runtime</code><a class="headerlink" href="#pluto_ecssruntime" title="Permanent link">&para;</a></h3>
+<p>The standard library the transpiled output calls into:</p>
+<ul>
+<li><code>Procedure</code>: lifecycle, event registry, watchdog handlers, variable scope.</li>
+<li><code>Event</code>: declared events with <code>raise_()</code>.</li>
+<li><code>Activity</code> + <code>register_activity</code>: pluggable activity handlers. Default behaviour prints a trace.</li>
+<li><code>switch_on(target)</code> / <code>switch_off(target)</code>: helpers that look up a registered activity and invoke it.</li>
+<li><code>initiate(call)</code> / <code>initiate_and_confirm(call)</code>: fire-and-forget vs synchronous.</li>
+<li><code>parallel_until_all([…])</code> / <code>parallel_until_one([…])</code>: thread-based concurrency.</li>
+<li><code>wait_for_event(proc, name, timeout=None)</code> / <code>wait_until(predicate, timeout=None)</code>.</li>
+<li><code>inform_user(...)</code> / <code>pluto_log(...)</code>.</li>
+</ul>
+<h3 id="pluto_ecsscli"><code>pluto_ecss.cli</code><a class="headerlink" href="#pluto_ecsscli" title="Permanent link">&para;</a></h3>
+<p><code>argparse</code> front-end exposing <code>parse / compile / run / demo</code> subcommands. <code>-v</code> enables Python logging at INFO level so you can watch the procedure lifecycle.</p>
+<h3 id="pluto_ecssdemo"><code>pluto_ecss.demo</code><a class="headerlink" href="#pluto_ecssdemo" title="Permanent link">&para;</a></h3>
+<p>Rich-based live dashboard. Registers custom activity handlers that mutate a <code>DashboardState</code>, monkey-patches <code>Procedure.start/finish/raise_event/declare_event</code> to broadcast lifecycle events, and runs the procedure in a thread while the main thread refreshes a <code>rich.Live</code> group.</p>
+<h3 id="pluto_ecsspygments_lexer"><code>pluto_ecss.pygments_lexer</code><a class="headerlink" href="#pluto_ecsspygments_lexer" title="Permanent link">&para;</a></h3>
+<p>A <code>RegexLexer</code> registered as a Pygments entry point named <code>pluto</code>, so any tool that uses Pygments (mkdocs, GitHub, Jupyter, etc.) can highlight <code>.pluto</code> code.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../examples/" class="btn btn-neutral float-left" title="Examples"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../arc/" class="btn btn-neutral float-right" title="Finish-Up-A-Thon arc">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+      <span><a href="../examples/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../arc/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

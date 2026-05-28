@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://stzifkas.github.io/pluto-ecss/grammar/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Grammar reference - pluto-ecss</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Grammar reference";
+        var mkdocs_page_input_path = "grammar.md";
+        var mkdocs_page_url = "/pluto-ecss/grammar/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> pluto-ecss
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Grammar reference</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#procedure-structure">Procedure structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#event-declarations">Event declarations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#activity-calls">Activity calls</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#parallel-execution">Parallel execution</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#control-flow">Control flow</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#waits-and-timeouts">Waits and timeouts</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#watchdog-handlers">Watchdog handlers</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#output">Output</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#expressions">Expressions</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#assignment">Assignment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#comments">Comments</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../examples/">Examples</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../architecture/">Architecture</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../arc/">Finish-Up-A-Thon arc</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../playground/">Playground</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pluto-ecss</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Grammar reference</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/stzifkas/pluto-ecss/edit/main/docs/grammar.md">Edit on stzifkas/pluto-ecss</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="grammar-reference">Grammar reference<a class="headerlink" href="#grammar-reference" title="Permanent link">&para;</a></h1>
+<p>Every PLUTO construct currently supported by the transpiler. The full
+formal grammar lives in <a href="https://github.com/stzifkas/pluto-ecss/blob/main/src/pluto_ecss/grammar.lark"><code>src/pluto_ecss/grammar.lark</code></a>.</p>
+<h2 id="procedure-structure">Procedure structure<a class="headerlink" href="#procedure-structure" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">procedure</span>
+  <span class="kr">declare</span> <span class="err">...</span> <span class="kd">end</span> <span class="kr">declare</span>           <span class="c1">// optional, event declarations</span>
+  <span class="kr">preconditions</span> <span class="err">...</span> <span class="kd">end</span> <span class="kr">preconditions</span>  <span class="c1">// optional</span>
+  <span class="kr">watchdog</span> <span class="err">...</span> <span class="kd">end</span> <span class="kr">watchdog</span>         <span class="c1">// optional, event handlers</span>
+  <span class="kr">main</span>
+    <span class="err">...</span>                             <span class="c1">// required</span>
+  <span class="kd">end</span> <span class="kr">main</span>
+  <span class="kr">confirmation</span> <span class="err">...</span> <span class="kd">end</span> <span class="kr">confirmation</span> <span class="c1">// optional</span>
+<span class="kd">end</span> <span class="kr">procedure</span>
+</code></pre></div>
+
+<p>Sections may appear in any order. <code>main</code> is required; the others are optional.</p>
+<h2 id="event-declarations">Event declarations<a class="headerlink" href="#event-declarations" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">declare</span>
+  <span class="kd">event</span> <span class="n">boom</span> <span class="kd">described</span> <span class="k">by</span> <span class="n">Critical</span> <span class="n">failure</span>
+  <span class="kd">event</span> <span class="n">chaos2</span>
+<span class="kd">end</span> <span class="kr">declare</span>
+</code></pre></div>
+
+<p>Multiple events can be comma-separated or newline-separated.</p>
+<h2 id="activity-calls">Activity calls<a class="headerlink" href="#activity-calls" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kp">initiate</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span>                           <span class="c1">// fire-and-forget</span>
+<span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Reaction</span> <span class="n">Wheel3</span>              <span class="c1">// wait for completion</span>
+<span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">off</span> <span class="n">Reaction</span> <span class="n">Wheel3</span> <span class="k">of</span> <span class="n">AOC</span> <span class="k">of</span> <span class="n">Satellite</span>
+</code></pre></div>
+
+<p>A qualified target like <code>X of Y of Z</code> is resolved against the runtime's
+system element registry.</p>
+<h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">BRING</span> <span class="n">UP</span> <span class="n">STAR</span> <span class="n">TRACKER</span>
+  <span class="kr">main</span>
+    <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span><span class="p">;</span>
+    <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker2</span><span class="p">;</span>
+  <span class="kd">end</span> <span class="kr">main</span>
+<span class="kd">end</span> <span class="kr">step</span>
+</code></pre></div>
+
+<h2 id="parallel-execution">Parallel execution<a class="headerlink" href="#parallel-execution" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="k">in</span> <span class="k">parallel</span> <span class="k">until</span> <span class="k">all</span> <span class="k">complete</span>
+  <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">A</span>
+    <span class="kr">main</span>
+      <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker1</span><span class="p">;</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+  <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+  <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kr">step</span> <span class="n">B</span>
+    <span class="kr">main</span>
+      <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">on</span> <span class="n">Star</span> <span class="n">Tracker2</span><span class="p">;</span>
+    <span class="kd">end</span> <span class="kr">main</span>
+  <span class="kd">end</span> <span class="kr">step</span><span class="p">;</span>
+<span class="kd">end</span> <span class="k">parallel</span>
+</code></pre></div>
+
+<p>Variants:</p>
+<ul>
+<li><code>in parallel until all complete … end parallel</code> — waits for every branch.</li>
+<li><code>in parallel until one completes … end parallel</code> — returns as soon as any branch finishes.</li>
+</ul>
+<h2 id="control-flow">Control flow<a class="headerlink" href="#control-flow" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span> <span class="n">mode</span> <span class="o">=</span> <span class="m">1</span> <span class="k">then</span>
+  <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;nominal&quot;</span>
+<span class="k">else</span>
+  <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;safe&quot;</span>
+<span class="kd">end</span> <span class="k">if</span>
+
+<span class="k">case</span> <span class="n">mode</span> <span class="k">of</span>
+  <span class="k">when</span> <span class="m">1</span> <span class="k">do</span> <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;STANDBY&quot;</span>
+  <span class="k">when</span> <span class="m">2</span> <span class="k">do</span> <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;NOMINAL&quot;</span>
+  <span class="k">otherwise</span> <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;UNKNOWN&quot;</span>
+<span class="kd">end</span> <span class="k">case</span>
+
+<span class="k">while</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="m">10</span> <span class="k">do</span>
+  <span class="n">c</span> <span class="o">:=</span> <span class="n">c</span> <span class="o">+</span> <span class="m">1</span>
+<span class="kd">end</span> <span class="k">while</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">1</span> <span class="k">to</span> <span class="m">5</span> <span class="k">do</span>
+  <span class="kp">log</span> <span class="s2">&quot;tick&quot;</span>
+<span class="kd">end</span> <span class="k">for</span>
+
+<span class="k">repeat</span>
+  <span class="kp">log</span> <span class="s2">&quot;hi&quot;</span>
+<span class="k">until</span> <span class="n">done</span> <span class="o">=</span> <span class="m">1</span>
+<span class="kd">end</span> <span class="k">repeat</span>
+</code></pre></div>
+
+<h2 id="waits-and-timeouts">Waits and timeouts<a class="headerlink" href="#waits-and-timeouts" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="k">wait</span> <span class="k">for</span> <span class="kd">event</span> <span class="n">ready</span>                           <span class="c1">// blocks until raised</span>
+<span class="k">wait</span> <span class="k">for</span> <span class="kd">event</span> <span class="n">ready</span> <span class="k">with</span> <span class="k">timeout</span> <span class="m">5</span>            <span class="c1">// raises after 5s</span>
+<span class="k">wait</span> <span class="k">until</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="m">3</span>                        <span class="c1">// poll until true</span>
+<span class="k">wait</span> <span class="k">until</span> <span class="n">temperature</span> <span class="o">&lt;</span> <span class="m">0.5</span> <span class="k">with</span> <span class="k">timeout</span> <span class="m">30</span>
+</code></pre></div>
+
+<p><code>with timeout E</code> also applies to <code>while</code> and <code>repeat</code>.</p>
+<h2 id="watchdog-handlers">Watchdog handlers<a class="headerlink" href="#watchdog-handlers" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kr">watchdog</span>
+  <span class="kp">on</span> <span class="n">boom</span> <span class="k">do</span>
+    <span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;handling boom&quot;</span>
+    <span class="kp">initiate</span> <span class="ow">and</span> <span class="kp">confirm</span> <span class="kp">Switch</span> <span class="kp">off</span> <span class="n">Reaction</span> <span class="n">Wheel3</span>
+  <span class="kd">end</span> <span class="kp">on</span>
+<span class="kd">end</span> <span class="kr">watchdog</span>
+</code></pre></div>
+
+<p>When <code>raise event boom</code> is reached in <code>main</code>, the corresponding handler
+runs synchronously before execution continues.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="kp">log</span> <span class="s2">&quot;message&quot;</span>             <span class="c1">// routed to the Python logger (visible with pluto-ecss -v)</span>
+<span class="kp">inform</span> <span class="kp">user</span> <span class="s2">&quot;message&quot;</span>     <span class="c1">// printed to stdout</span>
+</code></pre></div>
+
+<h2 id="expressions">Expressions<a class="headerlink" href="#expressions" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="n">x</span> <span class="o">:=</span> <span class="m">1</span> <span class="o">+</span> <span class="m">2</span> <span class="o">*</span> <span class="m">3</span>
+<span class="n">done</span> <span class="o">:=</span> <span class="p">(</span><span class="n">mode</span> <span class="o">=</span> <span class="m">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">counter</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)</span>
+<span class="n">ok</span> <span class="o">:=</span> <span class="ow">not</span> <span class="n">failed</span>
+</code></pre></div>
+
+<p>Operators: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>and</code>, <code>or</code>, <code>not</code>. Operands are numbers, strings (<code>"..."</code>), or qualified names.</p>
+<h2 id="assignment">Assignment<a class="headerlink" href="#assignment" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="n">counter</span> <span class="o">:=</span> <span class="m">0</span>
+<span class="n">counter</span> <span class="o">:=</span> <span class="n">counter</span> <span class="o">+</span> <span class="m">1</span>
+</code></pre></div>
+
+<h2 id="comments">Comments<a class="headerlink" href="#comments" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="c1">// this is a line comment</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quickstart/" class="btn btn-neutral float-left" title="Quickstart"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../examples/" class="btn btn-neutral float-right" title="Examples">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/stzifkas/pluto-ecss" class="fa fa-code-fork" style="color: #fcfcfc"> stzifkas/pluto-ecss</a>
+        </span>
+    
+    
+      <span><a href="../quickstart/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../examples/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

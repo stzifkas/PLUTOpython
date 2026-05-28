@@ -1,0 +1,5 @@
+[console_scripts]
+pluto-ecss = pluto_ecss.cli:main
+
+[pygments.lexers]
+pluto = pluto_ecss.pygments_lexer:PlutoLexer
