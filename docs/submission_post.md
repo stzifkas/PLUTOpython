@@ -8,7 +8,7 @@ Paste into dev.to and add:
 
 # I finally finished my GSoC 2019 project, seven years later
 
-Back in **2019**, as part of a [Google Summer of Code proposal](https://github.com/stzifkas/pluto-ecss/tree/v0.1-gsoc-2019), I started building an open-source parser for **PLUTO** — the procedure language [standardised by ECSS](https://ecss.nl/standard/ecss-e-st-70-32c-space-engineering-test-and-operations-procedure-language/) (`ECSS-E-ST-70-32C`) for spacecraft operations. PLUTO is the DSL ground operators write to bring up a star tracker, run a parallel safety sequence, or react to a satellite-on-orbit event.
+Back in **2019**, as part of a [Google Summer of Code proposal](https://github.com/stzifkas/pluto-ecss/tree/v0.1-gsoc-2019), I started building an open-source parser for **PLUTO** — the procedure language [standardised by ECSS](https://ecss.nl/standard/ecss-e-st-70-32c-test-and-operations-procedure-language/) (`ECSS-E-ST-70-32C`) for spacecraft operations. PLUTO is the DSL ground operators write to bring up a star tracker, run a parallel safety sequence, or react to a satellite-on-orbit event.
 
 My proposal sample built a parse tree from one hard-coded script and "ran" it by walking the tree. It was a proof-of-concept I never grew past one example file. Then life happened, and it sat dormant for seven years.
 
